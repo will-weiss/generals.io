@@ -1,5 +1,14 @@
 #!/bin/bash
 
+
+check_for_java() {
+  which java || {
+    echo "Could not detect java. Download the JDK here:"
+    echo "http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html"
+    exit 1
+  }
+}
+
 # Instructions taken from here: http://webdriver.io/guide.html
 install_geckodriver() {
   echo "Installing geckodriver..."
@@ -29,6 +38,7 @@ install_npm_packages() {
 }
 
 install() {
+  check_for_java
   echo "Installing geckodriver, selenium, and npm packages..."
   install_geckodriver &
   install_selenium &
