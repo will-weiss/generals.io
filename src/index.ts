@@ -52,23 +52,25 @@ function main(): void {
     const orders: Order[] = []
 
     for (const [from, armySize] of myArmies.entries()) {
-      if (armySize <= 1) continue
-      const to: Tile | undefined = sample(Array.from(gameState.config.revealed.adjacencies.get(from)!).concat([undefined, undefined, undefined, undefined] as any))
+      if (armySize < 1) continue
+      const to: Tile | undefined = sample(Array.from(gameState.config.revealed.adjacencies.get(from)!))
       if (!to) continue
       orders.push({ from, to, splitArmy: Math.random() < 0.5 })
-      if (orders.length > 3) break
+      if (orders.length > 1) break
     }
 
     return connection.submitOrders(orders)
   }
 
   connection.once('start', state => {
+    console.log('start', state.turn)
     gameConfiguration = new GameConfiguration('Anonymous', state)
     gameState = new GameState(gameConfiguration, state)
     takeRandomTurn()
   })
 
   connection.on('nextTurn', state => {
+    console.log('nextTurn', state.turn)
     gameState = new GameState(gameConfiguration, state)
     takeRandomTurn()
   })
@@ -77,3 +79,5 @@ function main(): void {
 }
 
 main()
+
+process.on('unhandledRejection', err => console.error(err))

@@ -9,6 +9,14 @@ check_for_java() {
   }
 }
 
+check_for_node6() {
+  which node || {
+    echo "Could not detect node. Download node v6 or higher here:"
+    echo "https://nodejs.org/en/"
+    exit 1
+  }
+}
+
 # Instructions taken from here: http://webdriver.io/guide.html
 install_geckodriver() {
   echo "Installing geckodriver..."
@@ -39,6 +47,7 @@ install_npm_packages() {
 
 install() {
   check_for_java
+  check_for_node6
   echo "Installing geckodriver, selenium, and npm packages..."
   install_geckodriver &
   install_selenium &
