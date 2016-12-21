@@ -1,0 +1,21 @@
+{
+  "version": "2.1.4",
+  "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
+    "declaration": false,
+    "noImplicitAny": false,
+    "removeComments": true,
+    "noLib": false,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "strictNullChecks": true,
+    "sourceMap": true,
+    "jsx": "react",
+    "rootDir": "src",
+    "outDir": "lib"
+  },
+  "exclude": [
+    "node_modules"
+  ]
+}
