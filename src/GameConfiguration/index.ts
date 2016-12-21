@@ -14,10 +14,10 @@ export default class XGameConfiguration implements GameConfiguration {
   }
 
   update(visibleGameState: VisibleGameState): void {
-    visibleGameState.tiles.forEach(VisibleTile => {
-      const tile = this.revealed.grid[VisibleTile.rowIndex][VisibleTile.colIndex]
-      if (VisibleTile.isCity) this.hidden.cities.add(tile)
-      if (VisibleTile.isGeneral) this.hidden.crowns.set(VisibleTile.color as LivePlayerColor, tile)
+    visibleGameState.tiles.forEach(visibleTile => {
+      const tile = this.revealed.grid[visibleTile.rowIndex][visibleTile.colIndex]
+      if (visibleTile.isCity) this.hidden.cities.add(tile)
+      if (visibleTile.isGeneral) this.hidden.crowns.set(visibleTile.color as LivePlayerColor, tile)
     })
   }
 }
