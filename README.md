@@ -1,3 +1,12 @@
-# TODO
+# What?
+A bot that plays this http://generals.io/
 
-Write this
+# Install
+```bash
+./install.sh
+```
+
+# Run
+```bash
+./run.sh
+```

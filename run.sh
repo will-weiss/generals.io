@@ -5,7 +5,7 @@ start_selenium_server() {
 }
 
 run() {
-  start_selenium_server && npm run compile && npm start
+  start_selenium_server && npm run build && npm start
 }
 
 run
