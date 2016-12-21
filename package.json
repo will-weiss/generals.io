@@ -1,10 +1,11 @@
 {
-  "name": "generals",
+  "name": "generals.io",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Bot for generals.io",
   "scripts": {
-    "test": "tsc && mocha 'lib/**/*.spec.js'"
+    "compile": "tsc",
+    "start": "node lib/index.js",
+    "test": "npm run compile && mocha 'lib/**/*.spec.js'"
   },
   "author": "",
   "license": "ISC",
