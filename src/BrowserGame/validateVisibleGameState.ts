@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { VisibleGameState, PlayerColors, PossibleTileColors } from '../types'
+import { VisibleGameState, PlayerColors } from '../types'
 
 
 export default function validateVisibleGameState(visibleState: VisibleGameState): VisibleGameState {
@@ -17,6 +17,7 @@ export default function validateVisibleGameState(visibleState: VisibleGameState)
     expect(leaderboardRow).to.have.property('land').that.is.a('number').that.is.not.below(0)
   })
 
+  const possibleTileColorsThisGame = visibleState.leaderboard.map(row => row.color).concat(['grey', null] as any)
   const observedCoordinates: Set<string> = new Set()
   let height = 1
   let width = 1
@@ -29,7 +30,7 @@ export default function validateVisibleGameState(visibleState: VisibleGameState)
     expect(visibleTile).to.have.property('isCity').that.is.a('boolean')
     expect(visibleTile).to.have.property('isGeneral').that.is.a('boolean')
     expect(visibleTile).to.have.property('isMountain').that.is.a('boolean')
-    expect(visibleTile).to.have.property('color').that.is.oneOf(PossibleTileColors)
+    expect(visibleTile).to.have.property('color').that.is.oneOf(possibleTileColorsThisGame)
 
     const { rowIndex, colIndex, army, color, isCity, isGeneral, isVisible, isMountain } = visibleTile
 

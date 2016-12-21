@@ -10,7 +10,10 @@ function createGrid(height: number, width: number): Tile[][] {
   return rowIndexes.map(rowIndex => colIndexes.map(colIndex => ({ rowIndex, colIndex })))
 }
 
-export default function createRevealedGameConfiguration(myName: string, firstVisibleState: VisibleGameState): RevealedGameConfiguration {
+export default function createRevealedGameConfiguration(
+  myName: string,
+  firstVisibleState: VisibleGameState
+): RevealedGameConfiguration {
 
   expect(firstVisibleState).to.have.property('turn').that.equals(0)
 
@@ -38,7 +41,7 @@ export default function createRevealedGameConfiguration(myName: string, firstVis
   const distances: Map<Tile, Map<Tile, number>> = new Map()
 
   function isPassable(tile: Tile): boolean {
-    return visibleMountainTiles.some(visibleMountain =>
+    return !visibleMountainTiles.some(visibleMountain =>
       tile.rowIndex === visibleMountain.rowIndex && tile.colIndex === visibleMountain.colIndex)
   }
 
@@ -47,7 +50,7 @@ export default function createRevealedGameConfiguration(myName: string, firstVis
     return row && row[colIndex]
   }
 
-  tiles.forEach(tile => { if (!isPassable(tile)) passable.add(tile) })
+  tiles.forEach(tile => { if (isPassable(tile)) passable.add(tile) })
   tiles.forEach(tile => adjacencies.set(tile, new Set()))
   tiles.forEach(tile => distances.set(tile, new Map()))
   tiles.forEach(from => tiles.forEach(to => distances.get(from)!.set(to, Infinity)))
@@ -61,8 +64,8 @@ export default function createRevealedGameConfiguration(myName: string, firstVis
     const east  = tileAt(rowIndex, colIndex + 1)
     if (north && passable.has(tile)) adjacencies.get(tile)!.add(north)
     if (south && passable.has(tile)) adjacencies.get(tile)!.add(south)
-    if (west && passable.has(tile))  adjacencies.get(tile)!.add(west)
-    if (east && passable.has(tile))  adjacencies.get(tile)!.add(east)
+    if (west  && passable.has(tile)) adjacencies.get(tile)!.add(west)
+    if (east  && passable.has(tile)) adjacencies.get(tile)!.add(east)
   })
 
   function walk(): void {
@@ -74,8 +77,10 @@ export default function createRevealedGameConfiguration(myName: string, firstVis
           const possiblySmallerDistance = adjacencyDistance + 1
           const currentDistance = distances.get(tile)!.get(otherTile)
           const performUpdate = possiblySmallerDistance < currentDistance
-          anyUpdated = anyUpdated || performUpdate
-          if (performUpdate) distances.get(tile)!.set(otherTile, possiblySmallerDistance)
+          if (performUpdate) {
+            distances.get(tile)!.set(otherTile, possiblySmallerDistance)
+            anyUpdated = true
+          }
         }
       }
     }

@@ -32,8 +32,8 @@ export default class BrowserGame extends EventEmitter {
 
   private clickTile(tile: Tile, doubleClick?: boolean): Browser {
     const selector = `#map > tbody > tr:nth-child(${tile.rowIndex + 1}) > td:nth-child(${tile.colIndex + 1})`
-    if (!doubleClick) return this.browser.click(selector)
-    return this.browser.click(selector).then(() => this.clickTile(tile))
+    const clicking = this.browser.click(selector)
+    return doubleClick ? clicking.then(() => this.clickTile(tile)) : clicking
   }
 
   private loadScrapeStateScript(): Promise<any> {

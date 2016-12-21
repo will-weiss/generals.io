@@ -70,7 +70,7 @@ export default function scrapeCurrentStateScript(): void {
     const scrapeGameOverState = () => {
       const gameResultHeader = global.document.querySelector('#game-page > .alert.center > center > h1') as HTMLHeadingElement | null
       const over = !!gameResultHeader
-      const victorious = over && getText(gameResultHeader!) === 'You won!'
+      const victorious = over && (getText(gameResultHeader!) === 'You won!')
       return { over, victorious }
     }
 
