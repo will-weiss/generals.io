@@ -51,7 +51,7 @@ export default function validateVisibleGameState(visibleState: VisibleGameState)
     expect(hasArmy === hasColor).to.be.true
   })
 
-  expect(visibleState.tiles).to.have.length(height * width, 'Number of visible tiles does not equal height * width')
+  expect(visibleState.tiles).to.have.length(height * width, `Number of visible tiles does not equal height * width: ${height * width}`)
 
   return visibleState
 }

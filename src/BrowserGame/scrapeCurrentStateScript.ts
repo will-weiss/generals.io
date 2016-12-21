@@ -3,12 +3,18 @@ import { LivePlayerColor, VisibleTile, LeaderboardRow, VisibleGameState } from '
 
 export default function scrapeCurrentStateScript(): void {
 
-  (window as any).scrapeCurrentState = (() => {
+  /* tslint:disable */
+  const global: Window & { scrapeCurrentState: Function } = (typeof window === 'undefined') ? this : window
+  /* tslint:enable */
+
+  global.scrapeCurrentState = (() => {
 
     const playerColors: LivePlayerColor[] = ['blue', 'teal', 'darkgreen', 'red', 'orange', 'green', 'purple', 'maroon']
 
     const toInt = (str: string) => Number.parseInt(str.trim(), 10)
-    const getElementById = (id: string): HTMLElement => window.document.getElementById(id)!
+    const getElementById = (id: string): HTMLElement => global.document.getElementById(id)!
+    const getText = (element: HTMLElement): string => element.innerText || element.textContent || ''
+    const getInt = (element: HTMLElement): number => toInt(getText(element)) || 0
     const hasClass = (element: HTMLElement) => (className: string): boolean => element.classList.contains(className)
     const getColorOf = (element: HTMLElement): LivePlayerColor | undefined => playerColors.find(hasClass(element))
 
@@ -21,7 +27,7 @@ export default function scrapeCurrentStateScript(): void {
 
     function scrapeTurn(): number {
       const turnCounter = getElementById('turn-counter')!
-      const turnCount = turnCounter.innerText.trim().replace('Turn ', '')
+      const turnCount = getText(turnCounter).trim().replace('Turn ', '')
       return toInt(turnCount)
     }
 
@@ -31,7 +37,7 @@ export default function scrapeCurrentStateScript(): void {
       const isVisible = !tdHasClass('fog') || isMountain
       const isGeneral = tdHasClass('general')
       const isCity = isGeneral || tdHasClass('city')
-      const army = toInt(td.innerText) || 0
+      const army = getInt(td)
       const color = army ? (getColorOf(td) || 'grey') : null
       return { rowIndex, colIndex, isVisible, isMountain, color, isGeneral, isCity, army }
     }
@@ -48,10 +54,10 @@ export default function scrapeCurrentStateScript(): void {
 
     function scrapeLeaderboardRowState(playerRow: HTMLTableDataCellElement[]): LeaderboardRow {
       const [playerNameCell, armyCell, landCell] = playerRow.slice(1)
-      const name = playerNameCell.innerText
+      const name = getText(playerNameCell)
       const color = getColorOf(playerNameCell)!
-      const army = toInt(armyCell.innerText)
-      const land = toInt(landCell.innerText)
+      const army = getInt(armyCell)
+      const land = getInt(landCell)
       return { name, color, army, land }
     }
 
@@ -62,9 +68,9 @@ export default function scrapeCurrentStateScript(): void {
     }
 
     const scrapeGameOverState = () => {
-      const gameResultHeader = document.querySelector('#game-page > .alert.center > center > h1') as HTMLHeadingElement | null
+      const gameResultHeader = global.document.querySelector('#game-page > .alert.center > center > h1') as HTMLHeadingElement | null
       const over = !!gameResultHeader
-      const victorious = over && gameResultHeader!.innerText === 'You won!'
+      const victorious = over && getText(gameResultHeader!) === 'You won!'
       return { over, victorious }
     }
 
