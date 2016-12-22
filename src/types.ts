@@ -85,3 +85,5 @@ export interface Order {
   to: Tile
   splitArmy: boolean
 }
+
+export type Strategy = (gameConfiguration: GameConfiguration, gameState: GameState) => Order[]

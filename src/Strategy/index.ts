@@ -2,7 +2,7 @@ import { sample } from 'lodash'
 import { Tile, Order, GameState, GameConfiguration } from '../types'
 
 
-export function getRandomOrders( gameConfiguration: GameConfiguration, gameState: GameState): Order[] {
+export function getRandomOrders(gameConfiguration: GameConfiguration, gameState: GameState): Order[] {
   const myArmies = gameState.armies.get(gameConfiguration.revealed.myColor)!
   const orders: Order[] = []
 
