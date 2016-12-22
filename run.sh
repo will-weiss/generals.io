@@ -14,7 +14,7 @@ check_for_selenium_server() {
 }
 
 run() {
-  if [[ check_for_selenium_server ]]; then
+  if [[ $(check_for_selenium_server) ]]; then
     npm run build && npm start
   else
     echo "Could not detect a running selenium server"
