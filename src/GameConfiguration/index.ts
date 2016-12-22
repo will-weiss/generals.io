@@ -12,12 +12,13 @@ export default class XGameConfiguration implements GameConfiguration {
     this.update(firstVisibleState)
   }
 
-  update(visibleGameState: VisibleGameState): void {
+  update(visibleGameState: VisibleGameState): this {
     visibleGameState.tiles.forEach(visibleTile => {
       if (!visibleTile.isCity) return
       const tile = this.revealed.grid[visibleTile.rowIndex][visibleTile.colIndex]
       this.hidden.cities.add(tile)
       if (visibleTile.isGeneral) this.hidden.crowns.set(visibleTile.color as LivePlayerColor, tile)
     })
+    return this
   }
 }

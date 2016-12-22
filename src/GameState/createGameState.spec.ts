@@ -1,27 +1,11 @@
 import { expect } from 'chai'
 import createRevealedGameConfiguration from '../GameConfiguration/createRevealedGameConfiguration'
 import createGameState from './index'
+import firstVisibleGameState from '../sampleVisibleState'
 import { VisibleGameState, GameConfiguration } from '../types'
 
 describe('createGameState', () => {
   it("computes the current game state given the game's configuration, the currently visible state, and the previous game state", () => {
-    const firstVisibleGameState: VisibleGameState = {
-      turn: 0,
-      game: { over: false, victorious: false },
-      leaderboard: [
-        { army: 151, name: 'Anonymous', land: 1, color: 'red' },
-        { army: 2, name: 'generals.io Tutorial', land: 9, color: 'blue' }
-      ],
-      tiles: [
-        { army: 50, isMountain: false, color: 'red', isCity: true,  isGeneral: true,  colIndex: 0, rowIndex: 0, isVisible: true  },
-        { army: 0,  isMountain: true,  color: null,  isCity: false, isGeneral: false, colIndex: 1, rowIndex: 0, isVisible: false },
-        { army: 0,  isMountain: false, color: null,  isCity: false, isGeneral: false, colIndex: 2, rowIndex: 0, isVisible: false },
-        { army: 0,  isMountain: false, color: null,  isCity: false, isGeneral: false, colIndex: 0, rowIndex: 1, isVisible: false },
-        { army: 0,  isMountain: false, color: null,  isCity: false, isGeneral: false, colIndex: 1, rowIndex: 1, isVisible: false },
-        { army: 0,  isMountain: false, color: null,  isCity: false, isGeneral: false, colIndex: 2, rowIndex: 1, isVisible: false },
-      ],
-    }
-
     const revealedGameConfiguration = createRevealedGameConfiguration('Anonymous', firstVisibleGameState)
 
     const config: GameConfiguration = {
