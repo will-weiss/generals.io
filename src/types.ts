@@ -21,7 +21,6 @@ export interface RevealedGameConfiguration {
   grid: Tile[][]
   tiles: Set<Tile>
   passable: Set<Tile>
-  mountains: Set<Tile>
   myColor: LivePlayerColor
   myCrown: Tile
   adjacencies: Map<Tile, Set<Tile>>
@@ -45,8 +44,12 @@ export interface PlayerStatus {
 }
 
 export interface GameState {
-  config: GameConfiguration
-  visibleGameStates: VisibleGameState[]
+  turn: number
+  gameOver: boolean
+  victorious: boolean
+  leaderboard: Map<PlayerColor, PlayerStatus>
+  armies: Map<PlayerColor, Map<Tile, number>>
+  pastState: GameState | undefined
 }
 
 export interface VisibleTile {

@@ -15,7 +15,8 @@ export default function createRevealedGameConfiguration(
   firstVisibleState: VisibleGameState
 ): RevealedGameConfiguration {
 
-  expect(firstVisibleState).to.have.property('turn').that.equals(0)
+  // For now it seems we're not fast enough to assert this...
+  // expect(firstVisibleState).to.have.property('turn').that.equals(0)
 
   const playerColors = firstVisibleState.leaderboard.map(row => row.color)
   const myLeaderboardRow = firstVisibleState.leaderboard.find(row => row.name === myName)
@@ -90,5 +91,5 @@ export default function createRevealedGameConfiguration(
 
   walk()
 
-  return deepFreeze({ playerColors, height, width, myColor, myCrown, grid, tiles, passable, adjacencies, distances })
+  return { playerColors, height, width, myColor, myCrown, grid, tiles, passable, adjacencies, distances }
 }
