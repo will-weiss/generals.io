@@ -1,10 +1,10 @@
 import BrowserGame from './BrowserGame'
 import GameConfiguration from './GameConfiguration'
 import createGameState from './GameState'
-import { Order, GameState, Strategy } from './types'
+import { Order, GameState, Strategy, VisibleGameState } from './types'
 
 
-export default function playGame(connection: BrowserGame, strategy: Strategy): Promise<any> {
+export default function playGame(connection: BrowserGame, strategy: Strategy): Promise<VisibleGameState> {
   return new Promise((resolve, reject) => {
     let gameConfiguration: GameConfiguration
     let gameState: GameState
@@ -14,22 +14,23 @@ export default function playGame(connection: BrowserGame, strategy: Strategy): P
       return connection.submitOrders(orders)
     }
 
-    connection.once('start', state => {
-      console.log('start', state.turn)
-      gameConfiguration = new GameConfiguration('Anonymous', state)
-      gameState = createGameState(gameConfiguration, state)
+    connection.once('start', (visibleState: VisibleGameState) => {
+      console.log('start', visibleState.turn)
+      gameConfiguration = new GameConfiguration('Anonymous', visibleState)
+      gameState = createGameState(gameConfiguration, visibleState)
       takeTurn()
     })
 
-    connection.on('nextTurn', state => {
-      console.log('nextTurn', state.turn)
-      gameState = createGameState(gameConfiguration, state, gameState)
+    connection.on('nextTurn', (visibleState: VisibleGameState) => {
+      console.log('nextTurn', visibleState.turn)
+      gameConfiguration.update(visibleState)
+      gameState = createGameState(gameConfiguration, visibleState, gameState)
       takeTurn()
     })
 
-    connection.on('gameOver', state => {
-      console.log('gameOver', state)
-      resolve(state)
+    connection.on('gameOver', (visibleState: VisibleGameState) => {
+      console.log('gameOver', visibleState)
+      resolve(visibleState)
     })
 
     connection.on('error', error => reject(error))
