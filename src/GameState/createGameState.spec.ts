@@ -1,17 +1,12 @@
 import { expect } from 'chai'
-import createRevealedGameConfiguration from '../GameConfiguration/createRevealedGameConfiguration'
+import GameConfiguration from '../GameConfiguration'
 import createGameState from './index'
 import sampleFirstTurnVisibleGameInformation from '../sampleFirstTurnVisibleGameInformation'
-import { VisibleGameInformation, GameConfiguration } from '../types'
+
 
 describe('createGameState', () => {
   it("computes the current game state given the game's configuration, the currently visible state, and the previous game state", () => {
-    const revealedGameConfiguration = createRevealedGameConfiguration('Anonymous', sampleFirstTurnVisibleGameInformation)
-
-    const config: GameConfiguration = {
-      hidden: { cities: new Set(), crowns: new Map() },
-      revealed: revealedGameConfiguration
-    }
+    const config = new GameConfiguration('Anonymous', sampleFirstTurnVisibleGameInformation)
 
     const gameState = createGameState(config, sampleFirstTurnVisibleGameInformation)
 

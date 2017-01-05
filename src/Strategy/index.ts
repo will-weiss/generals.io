@@ -8,7 +8,7 @@ export function getPossibleOrders(gameConfiguration: GameConfiguration, gameStat
 
   for (const [from, armySize] of myArmies.entries()) {
     if (armySize < 2) continue
-    const adjacencies = gameConfiguration.revealed.adjacencies.get(from)!
+    const adjacencies = gameConfiguration.hidden.adjacencies.get(from)!
     for (const to of adjacencies) {
       orders.push(
         { from, to, splitArmy: false },

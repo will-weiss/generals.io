@@ -20,16 +20,16 @@ export interface RevealedGameConfiguration {
   width: number
   grid: Tile[][]
   tiles: Set<Tile>
-  passable: Set<Tile>
   myColor: LivePlayerColor
   myCrown: Tile
-  adjacencies: Map<Tile, Set<Tile>>
-  distances: Map<Tile, Map<Tile, number>>
 }
 
 export interface HiddenGameConfiguration {
   cities: Set<Tile>
   crowns: Map<LivePlayerColor, Tile>
+  passable: Set<Tile>
+  adjacencies: Map<Tile, Set<Tile>>
+  distances: Map<Tile, Map<Tile, number>>
 }
 
 export interface GameConfiguration {
