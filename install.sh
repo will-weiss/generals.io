@@ -18,18 +18,18 @@ check_for_node6() {
 }
 
 # Instructions taken from here: http://webdriver.io/guide.html
-install_geckodriver() {
-  echo "Installing geckodriver..."
+install_chromedriver() {
+  echo "Installing chromedriver..."
   platform=$(uname -s)
 
   if [[ "${platform}" = 'Darwin' ]]; then
-    curl -L https://github.com/mozilla/geckodriver/releases/download/v0.11.1/geckodriver-v0.11.1-macos.tar.gz | tar xz
+    brew install chromedriver
   elif [[ "${platform}" = 'Linux' ]]; then
-    curl -L https://github.com/mozilla/geckodriver/releases/download/v0.11.1/geckodriver-v0.11.1-linux64.tar.gz | tar xz
+    echo "We only support macs for now" && exit 1
   else
-    echo "Installing geckodriver requires a mac or linux platform" && exit 1
+    echo "We only support macs for now " && exit 1
   fi
-  echo "geckodriver installed."
+  echo "chromedriver installed."
 }
 
 # Instructions taken from here: http://webdriver.io/guide.html
@@ -48,12 +48,12 @@ install_npm_packages() {
 install() {
   check_for_java
   check_for_node6
-  echo "Installing geckodriver, selenium, and npm packages..."
-  install_geckodriver &
+  echo "Installing chromedriver, selenium, and npm packages..."
+  install_chromedriver &
   install_selenium &
   install_npm_packages &
   wait
-  echo "geckodriver, selenium, and npm packages installed."
+  echo "chromedriver, selenium, and npm packages installed."
 }
 
 install
