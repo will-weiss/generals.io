@@ -1,8 +1,8 @@
 import { expect } from 'chai'
-import { VisibleGameState, PlayerColors } from '../types'
+import { VisibleGameInformation, PlayerColors } from '../types'
 
 
-export default function validateVisibleGameState(visibleState: VisibleGameState): VisibleGameState {
+export default function validateVisibleGameState(visibleState: VisibleGameInformation): VisibleGameInformation {
 
   expect(visibleState).to.have.property('turn').that.is.not.below(0)
   expect(visibleState).to.have.deep.property('game.over').that.is.a('boolean')

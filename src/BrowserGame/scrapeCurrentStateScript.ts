@@ -1,4 +1,4 @@
-import { LivePlayerColor, VisibleTile, LeaderboardRow, VisibleGameState } from '../types'
+import { LivePlayerColor, VisibleTileInformation, LeaderboardRow, VisibleGameInformation } from '../types'
 
 
 export default function scrapeCurrentStateScript(): void {
@@ -31,7 +31,7 @@ export default function scrapeCurrentStateScript(): void {
       return toInt(turnCount)
     }
 
-    function scrapeTileState(rowIndex: number, colIndex: number, td: HTMLTableDataCellElement): VisibleTile {
+    function scrapeTileState(rowIndex: number, colIndex: number, td: HTMLTableDataCellElement): VisibleTileInformation {
       const tdHasClass = hasClass(td)
       const isMountain = tdHasClass('mountain') || tdHasClass('obstacle')
       const isVisible = !tdHasClass('fog') || isMountain
@@ -42,8 +42,8 @@ export default function scrapeCurrentStateScript(): void {
       return { rowIndex, colIndex, isVisible, isMountain, color, isGeneral, isCity, army }
     }
 
-    function scrapeMapState(): VisibleTile[] {
-      const mapState: VisibleTile[] = []
+    function scrapeMapState(): VisibleTileInformation[] {
+      const mapState: VisibleTileInformation[] = []
 
       getMatrixOf('map').forEach((dataCells, rowIndex) =>
         dataCells.forEach((td, colIndex) =>
@@ -74,7 +74,7 @@ export default function scrapeCurrentStateScript(): void {
       return { over, victorious }
     }
 
-    function scrapeCurrentState(): VisibleGameState {
+    function scrapeCurrentState(): VisibleGameInformation {
       return {
         game: scrapeGameOverState(),
         turn: scrapeTurn(),

@@ -2,7 +2,7 @@ import { EventEmitter } from 'events'
 import webdriverio = require('webdriverio')
 import scrapeCurrentStateScript from './scrapeCurrentStateScript'
 import validateVisibleGameState from './validateVisibleGameState'
-import { VisibleGameState, Order, Tile } from '../types'
+import { VisibleGameInformation, Order, Tile } from '../types'
 
 
 type Browser = webdriverio.Client<void>
@@ -13,7 +13,7 @@ const webdriverOpts = { desiredCapabilities: { browserName: 'firefox' } }
 
 export default class BrowserGame extends EventEmitter {
   private browser: Browser
-  private lastVisibleState: VisibleGameState | undefined
+  private lastVisibleState: VisibleGameInformation | undefined
 
   constructor() {
     super()
@@ -54,7 +54,7 @@ export default class BrowserGame extends EventEmitter {
       .then(() => this.waitForNextTurn())
   }
 
-  private scrapeCurrentState(): Promise<VisibleGameState> {
+  private scrapeCurrentState(): Promise<VisibleGameInformation> {
     return new Promise((resolve, reject) =>
       this.browser.execute(function(): any { return (window as any).scrapeCurrentState() })
         .then(result => this.lastVisibleState = validateVisibleGameState(result.value))

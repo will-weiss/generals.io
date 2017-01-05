@@ -1,10 +1,10 @@
 import { expect } from 'chai'
 import createRevealedGameConfiguration from './createRevealedGameConfiguration'
-import { VisibleGameState } from '../types'
+import { VisibleGameInformation } from '../types'
 
 
 describe('createRevealedGameConfiguration', () => {
-  const firstVisibleGameState: VisibleGameState = {
+  const firstVisibleGameState: VisibleGameInformation = {
     turn: 0,
     game: { over: false, victorious: false },
     leaderboard: [

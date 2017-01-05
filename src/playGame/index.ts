@@ -1,10 +1,10 @@
 import BrowserGame from '../BrowserGame'
 import GameConfiguration from '../GameConfiguration'
 import createGameState from '../GameState'
-import { Order, GameState, Strategy, VisibleGameState } from '../types'
+import { Order, GameState, Strategy, VisibleGameInformation } from '../types'
 
 
-export default function playGame(connection: BrowserGame, strategy: Strategy): Promise<VisibleGameState> {
+export default function playGame(connection: BrowserGame, strategy: Strategy): Promise<VisibleGameInformation> {
   return new Promise((resolve, reject) => {
     let gameConfiguration: GameConfiguration
     let gameState: GameState
@@ -14,13 +14,13 @@ export default function playGame(connection: BrowserGame, strategy: Strategy): P
       return connection.submitOrder(order).catch(reject)
     }
 
-    function onGameStart(visibleState: VisibleGameState): void {
+    function onGameStart(visibleState: VisibleGameInformation): void {
       gameConfiguration = new GameConfiguration('Anonymous', visibleState)
       gameState = createGameState(gameConfiguration, visibleState)
       takeTurn()
     }
 
-    function onNextTurn(visibleState: VisibleGameState): void {
+    function onNextTurn(visibleState: VisibleGameInformation): void {
       gameConfiguration = gameConfiguration.update(visibleState)
       gameState = createGameState(gameConfiguration, visibleState)
       takeTurn()

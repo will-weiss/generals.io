@@ -52,7 +52,7 @@ export interface GameState {
   pastState: GameState | undefined
 }
 
-export interface VisibleTile {
+export interface VisibleTileInformation {
   rowIndex: number
   colIndex: number
   isVisible: boolean
@@ -70,9 +70,9 @@ export interface LeaderboardRow {
   land: number
 }
 
-export interface VisibleGameState {
+export interface VisibleGameInformation {
   turn: number
-  tiles: VisibleTile[]
+  tiles: VisibleTileInformation[]
   leaderboard: LeaderboardRow[]
   game: {
     over: boolean

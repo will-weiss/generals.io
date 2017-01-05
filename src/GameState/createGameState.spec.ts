@@ -2,7 +2,7 @@ import { expect } from 'chai'
 import createRevealedGameConfiguration from '../GameConfiguration/createRevealedGameConfiguration'
 import createGameState from './index'
 import firstVisibleGameState from '../sampleVisibleState'
-import { VisibleGameState, GameConfiguration } from '../types'
+import { VisibleGameInformation, GameConfiguration } from '../types'
 
 describe('createGameState', () => {
   it("computes the current game state given the game's configuration, the currently visible state, and the previous game state", () => {

@@ -1,8 +1,8 @@
 import deepFreeze = require('deep-freeze')
-import { VisibleGameState } from './types'
+import { VisibleGameInformation } from './types'
 
 
-const firstVisibleGameState: VisibleGameState = {
+const firstVisibleGameState: VisibleGameInformation = {
   turn: 0,
   game: { over: false, victorious: false },
   leaderboard: [
@@ -19,4 +19,4 @@ const firstVisibleGameState: VisibleGameState = {
   ],
 }
 
-export default deepFreeze(firstVisibleGameState) as VisibleGameState
+export default deepFreeze(firstVisibleGameState) as VisibleGameInformation

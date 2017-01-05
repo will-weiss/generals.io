@@ -1,12 +1,12 @@
 import { expect } from 'chai'
 import { cloneDeep } from 'lodash'
 import validateVisibleGameState from './validateVisibleGameState'
-import { VisibleGameState } from '../types'
+import { VisibleGameInformation } from '../types'
 
 
 describe('validateVisibleGameState', () => {
 
-  const validGameState: VisibleGameState = {
+  const validGameState: VisibleGameInformation = {
     game: { over: false, victorious: false },
     turn: 55,
     leaderboard: [

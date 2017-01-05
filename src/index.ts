@@ -1,10 +1,10 @@
 import BrowserGame from './BrowserGame'
 import playGame from './playGame'
 import { getRandomOrder } from './Strategy'
-import { VisibleGameState } from './types'
+import { VisibleGameInformation } from './types'
 
 
-function main(): Promise<VisibleGameState> {
+function main(): Promise<VisibleGameInformation> {
   const connection = new BrowserGame()
   return playGame(connection, getRandomOrder)
 }

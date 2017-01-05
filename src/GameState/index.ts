@@ -1,9 +1,9 @@
-import { GameConfiguration, VisibleGameState, GameState } from '../types'
+import { GameConfiguration, VisibleGameInformation, GameState } from '../types'
 
 
 export default function createGameState(
   config: GameConfiguration,
-  visibleState: VisibleGameState,
+  visibleState: VisibleGameInformation,
   pastState?: GameState
 ): GameState {
   const turn = visibleState.turn

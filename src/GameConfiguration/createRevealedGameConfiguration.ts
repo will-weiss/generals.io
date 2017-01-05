@@ -1,7 +1,7 @@
 import deepFreeze = require('deep-freeze')
 import { expect } from 'chai'
 import { flatten, max, range } from 'lodash'
-import { Tile, RevealedGameConfiguration, VisibleGameState } from '../types'
+import { Tile, RevealedGameConfiguration, VisibleGameInformation } from '../types'
 
 
 function createGrid(height: number, width: number): Tile[][] {
@@ -12,7 +12,7 @@ function createGrid(height: number, width: number): Tile[][] {
 
 export default function createRevealedGameConfiguration(
   myName: string,
-  firstVisibleState: VisibleGameState
+  firstVisibleState: VisibleGameInformation
 ): RevealedGameConfiguration {
 
   // For now it seems we're not fast enough to assert this...
