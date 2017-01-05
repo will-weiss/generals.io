@@ -14,5 +14,5 @@ In one terminal window
 
 Then in the other
 ```bash
-./run.sh
+npm run dev
 ```

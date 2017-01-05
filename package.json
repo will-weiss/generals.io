@@ -6,6 +6,7 @@
     "build": "npm run copy && npm run compile",
     "copy": "rsync -a --exclude '*.ts' src/ lib/",
     "compile": "tsc",
+    "dev": "npm run build && npm start",
     "start": "node lib/index.js",
     "test": "npm run build && mocha 'lib/**/*.spec.js'"
   },
