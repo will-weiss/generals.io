@@ -22,56 +22,58 @@ export default class BrowserGame extends EventEmitter {
     this.loadScrapeStateScript().then(() => this.beginGame())
   }
 
-  submitOrder(order: Order | undefined): Promise<void> {
-    if (!order) return Promise.resolve()
+  async submitOrder(order: Order | undefined): Promise<void> {
+    if (!order) return
     const { from, to, splitArmy } = order
-    return new Promise((resolve, reject) =>
-      this.clickTile(from, splitArmy)
-        .then(() => this.clickTile(to))
-        .then(() => resolve())
-        .catch(reject)) as Promise<any>
-  }
-
-  private clickTile(tile: Tile, doubleClick?: boolean): Browser {
-    const selector = `#map > tbody > tr:nth-child(${tile.rowIndex + 1}) > td:nth-child(${tile.colIndex + 1})`
-    const clicking = this.browser.click(selector)
-    return doubleClick ? clicking.then(() => this.clickTile(tile)) : clicking
+    await this.clickTile(from, splitArmy)
+    await this.clickTile(to)
   }
 
   private loadScrapeStateScript(): Promise<any> {
     return this.browser.execute(scrapeCurrentStateScript) as any
   }
 
-  private beginGame(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      this.browser.click('button.big')
-        .waitForVisible('td.selectable.general', 1000)
-        .then(visible => visible ? resolve() : reject('Game could not begin'))
-        .catch(reject)
-    })
-      .then(() => this.scrapeCurrentState())
-      .then(() => this.emit('start', this.lastVisibleState))
-      .then(() => this.waitForNextTurn())
+  private async click(selector: string): Promise<void> {
+    await this.browser.click(selector)
   }
 
-  private scrapeCurrentState(): Promise<VisibleGameInformation> {
-    return new Promise((resolve, reject) =>
-      this.browser.execute(function(): any { return (window as any).scrapeCurrentState() })
-        .then(result => this.lastVisibleState = validateVisibleGameState(result.value))
-        .then(resolve, reject))
+  private async clickTile(tile: Tile, doubleClick?: boolean): Promise<void> {
+    const selector = `#map > tbody > tr:nth-child(${tile.rowIndex + 1}) > td:nth-child(${tile.colIndex + 1})`
+    await this.click(selector)
+    if (doubleClick) await this.click(selector)
   }
 
-  private waitForNextTurn(): any {
+  private async beginGame(): Promise<void> {
+    await this.browser.click('button.big').waitForVisible('td.selectable.general', 1000)
+    await this.scrapeCurrentState()
+    this.emit('start', this.lastVisibleState)
+    await this.waitForNextTurn()
+  }
+
+  private async scrapeCurrentState(): Promise<VisibleGameInformation> {
+    const result = await this.browser.execute(function(): any { return (window as any).scrapeCurrentState() })
+    this.lastVisibleState = result.value as VisibleGameInformation
+    return this.lastVisibleState
+  }
+
+  private async waitForNextTurn(): Promise<void> {
     const lastTurn = this.lastVisibleState!.turn
-    return (this.browser.waitUntil(() =>
+
+    await (this.browser.waitUntil(() =>
       (this.browser.getText('#turn-counter') as any).then((turnCounterText: string) => {
         const match = turnCounterText.match(/\d+/)
         if (!match) throw new Error('Could locate turn counter')
         return parseInt(match[0], 10) > lastTurn
       })
     , 20000) as any)
-      .then(() => this.scrapeCurrentState())
-      .then(() => this.emit('nextTurn', this.lastVisibleState))
-      .then(() => this.lastVisibleState!.game.over ? this.emit('gameOver') : this.waitForNextTurn())
+
+    await this.scrapeCurrentState()
+    this.emit('nextTurn', this.lastVisibleState)
+
+    if (this.lastVisibleState!.game.over) {
+      this.emit('gameOver')
+    } else {
+      await this.waitForNextTurn()
+    }
   }
 }
