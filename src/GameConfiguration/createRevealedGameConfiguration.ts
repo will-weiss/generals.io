@@ -63,10 +63,10 @@ export default function createRevealedGameConfiguration(
     const south = tileAt(rowIndex + 1, colIndex)
     const west  = tileAt(rowIndex, colIndex - 1)
     const east  = tileAt(rowIndex, colIndex + 1)
-    if (north && passable.has(tile)) adjacencies.get(tile)!.add(north)
-    if (south && passable.has(tile)) adjacencies.get(tile)!.add(south)
-    if (west  && passable.has(tile)) adjacencies.get(tile)!.add(west)
-    if (east  && passable.has(tile)) adjacencies.get(tile)!.add(east)
+    if (north && passable.has(north)) adjacencies.get(tile)!.add(north)
+    if (south && passable.has(south)) adjacencies.get(tile)!.add(south)
+    if (west  && passable.has(west))  adjacencies.get(tile)!.add(west)
+    if (east  && passable.has(east))  adjacencies.get(tile)!.add(east)
   })
 
   function walk(): void {
