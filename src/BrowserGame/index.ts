@@ -8,7 +8,7 @@ import { VisibleGameInformation, Order, Tile } from '../types'
 type Browser = webdriverio.Client<void>
 
 const generalsIoUrl = 'http://generals.io'
-const webdriverOpts = { desiredCapabilities: { browserName: 'firefox' } }
+const webdriverOpts = { desiredCapabilities: { browserName: 'chrome' } }
 
 
 export default class BrowserGame extends EventEmitter {
