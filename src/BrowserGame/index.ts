@@ -44,7 +44,8 @@ export default class BrowserGame extends EventEmitter {
   }
 
   private async beginGame(): Promise<void> {
-    await this.browser.click('button.big').waitForVisible('td.selectable.general', 1000)
+    await this.click('button.big')
+    await this.browser.waitForVisible('td.selectable.general', 1000)
     await this.scrapeCurrentState()
     this.emit('start', this.lastVisibleState)
     await this.waitForNextTurn()
@@ -59,13 +60,13 @@ export default class BrowserGame extends EventEmitter {
   private async waitForNextTurn(): Promise<void> {
     const lastTurn = this.lastVisibleState!.turn
 
-    await (this.browser.waitUntil(() =>
+    await this.browser.waitUntil(() =>
       (this.browser.getText('#turn-counter') as any).then((turnCounterText: string) => {
         const match = turnCounterText.match(/\d+/)
         if (!match) throw new Error('Could locate turn counter')
         return parseInt(match[0], 10) > lastTurn
       })
-    , 20000) as any)
+    , 20000)
 
     await this.scrapeCurrentState()
     this.emit('nextTurn', this.lastVisibleState)
