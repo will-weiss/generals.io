@@ -1,19 +1,19 @@
 import { expect } from 'chai'
 import createRevealedGameConfiguration from '../GameConfiguration/createRevealedGameConfiguration'
 import createGameState from './index'
-import firstVisibleGameState from '../sampleVisibleState'
+import sampleFirstTurnVisibleGameInformation from '../sampleFirstTurnVisibleGameInformation'
 import { VisibleGameInformation, GameConfiguration } from '../types'
 
 describe('createGameState', () => {
   it("computes the current game state given the game's configuration, the currently visible state, and the previous game state", () => {
-    const revealedGameConfiguration = createRevealedGameConfiguration('Anonymous', firstVisibleGameState)
+    const revealedGameConfiguration = createRevealedGameConfiguration('Anonymous', sampleFirstTurnVisibleGameInformation)
 
     const config: GameConfiguration = {
       hidden: { cities: new Set(), crowns: new Map() },
       revealed: revealedGameConfiguration
     }
 
-    const gameState = createGameState(config, firstVisibleGameState)
+    const gameState = createGameState(config, sampleFirstTurnVisibleGameInformation)
 
     expect(gameState).to.have.all.keys('turn', 'gameOver', 'victorious', 'leaderboard', 'armies', 'pastState')
 

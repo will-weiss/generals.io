@@ -2,7 +2,7 @@ import deepFreeze = require('deep-freeze')
 import { VisibleGameInformation } from './types'
 
 
-const firstVisibleGameState: VisibleGameInformation = {
+const sampleFirstTurnVisibleGameInformation: VisibleGameInformation = {
   turn: 0,
   game: { over: false, victorious: false },
   leaderboard: [
@@ -19,4 +19,4 @@ const firstVisibleGameState: VisibleGameInformation = {
   ],
 }
 
-export default deepFreeze(firstVisibleGameState) as VisibleGameInformation
+export default deepFreeze(sampleFirstTurnVisibleGameInformation) as VisibleGameInformation

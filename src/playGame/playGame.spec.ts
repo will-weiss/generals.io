@@ -2,7 +2,7 @@ import { expect } from 'chai'
 import { cloneDeep } from 'lodash'
 import { stub, SinonStub } from 'sinon'
 import { EventEmitter } from 'events'
-import startingGameState from '../sampleVisibleState'
+import sampleFirstTurnVisibleGameInformation from '../sampleFirstTurnVisibleGameInformation'
 import playGame from './index'
 
 
@@ -15,7 +15,7 @@ describe('playGame', () => {
     strategy.onFirstCall().returns('order after game start')
     strategy.onSecondCall().returns('order after next turn')
 
-    const nextTurnGameState = cloneDeep(startingGameState)
+    const nextTurnGameState = cloneDeep(sampleFirstTurnVisibleGameInformation)
     nextTurnGameState.turn = 1
 
     const gameOverGameState = cloneDeep(nextTurnGameState)
@@ -32,7 +32,7 @@ describe('playGame', () => {
 
     const inProgressGame = playGame(connection as any, strategy)
 
-    await tickThenEmit('start', startingGameState)
+    await tickThenEmit('start', sampleFirstTurnVisibleGameInformation)
     await tickThenEmit('nextTurn', nextTurnGameState)
     await tickThenEmit('gameOver', gameOverGameState)
 

@@ -1,18 +1,15 @@
 import { expect } from 'chai'
-import { cloneDeep } from 'lodash'
-import { stub, SinonStub } from 'sinon'
-import { EventEmitter } from 'events'
-import firstVisibleGameState from '../sampleVisibleState'
+import sampleFirstTurnVisibleGameInformation from '../sampleFirstTurnVisibleGameInformation'
 import { getPossibleOrders } from './index'
-import { Tile, Order, GameState } from '../types'
+import { Order, GameState } from '../types'
 import GameConfiguration from '../GameConfiguration'
 import createGameState from '../GameState'
 
 
 describe('getPossibleOrders', () => {
   it('returns an array of possble orders given the game state and game configuration', () => {
-    const gameConfiguration: GameConfiguration = new GameConfiguration('Anonymous', firstVisibleGameState)
-    const gameState: GameState = createGameState(gameConfiguration, firstVisibleGameState)
+    const gameConfiguration: GameConfiguration = new GameConfiguration('Anonymous', sampleFirstTurnVisibleGameInformation)
+    const gameState: GameState = createGameState(gameConfiguration, sampleFirstTurnVisibleGameInformation)
     const possibleOrders: Order[] = getPossibleOrders(gameConfiguration, gameState)
     expect(possibleOrders).to.be.an('array')
     expect(possibleOrders).to.have.length(2)
