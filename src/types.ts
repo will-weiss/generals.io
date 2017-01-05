@@ -86,4 +86,4 @@ export interface Order {
   splitArmy: boolean
 }
 
-export type Strategy = (gameConfiguration: GameConfiguration, gameState: GameState) => Order[]
+export type Strategy = (gameConfiguration: GameConfiguration, gameState: GameState) => Order | undefined

@@ -8,12 +8,12 @@ import playGame from './index'
 
 describe('playGame', () => {
   it('listens for game events, passes visible game states to a particular strategy submits calculated orders, and resolves with the last visible game state when the game is over', async () => {
-    const connection = new EventEmitter() as EventEmitter & { submitOrders: SinonStub }
-    connection.submitOrders = stub().returns(Promise.resolve())
+    const connection = new EventEmitter() as EventEmitter & { submitOrder: SinonStub }
+    connection.submitOrder = stub().returns(Promise.resolve())
 
     const strategy = stub()
-    strategy.onFirstCall().returns('orders after game start')
-    strategy.onSecondCall().returns('orders after next turn')
+    strategy.onFirstCall().returns('order after game start')
+    strategy.onSecondCall().returns('order after next turn')
 
     const nextTurnGameState = cloneDeep(startingGameState)
     nextTurnGameState.turn = 1
@@ -39,8 +39,8 @@ describe('playGame', () => {
     const result = await inProgressGame
 
     expect(result).to.equal(gameOverGameState)
-    expect(connection.submitOrders.callCount).to.equal(2)
-    expect(connection.submitOrders.firstCall.args).to.deep.equal(['orders after game start'])
-    expect(connection.submitOrders.secondCall.args).to.deep.equal(['orders after next turn'])
+    expect(connection.submitOrder.callCount).to.equal(2)
+    expect(connection.submitOrder.firstCall.args).to.deep.equal(['order after game start'])
+    expect(connection.submitOrder.secondCall.args).to.deep.equal(['order after next turn'])
   })
 })

@@ -22,12 +22,14 @@ export default class BrowserGame extends EventEmitter {
     this.loadScrapeStateScript().then(() => this.beginGame())
   }
 
-  submitOrders(orders: Order[]): Promise<void> {
-    if (!orders.length) return Promise.resolve()
-    const [order, ...remainingOrders] = orders
-    return Promise.resolve()
-      .then(() => this.submitOrder(order))
-      .then(() => this.submitOrders(remainingOrders))
+  submitOrder(order: Order | undefined): Promise<void> {
+    if (!order) return Promise.resolve()
+    const { from, to, splitArmy } = order
+    return new Promise((resolve, reject) =>
+      this.clickTile(from, splitArmy)
+        .then(() => this.clickTile(to))
+        .then(() => resolve())
+        .catch(reject)) as Promise<any>
   }
 
   private clickTile(tile: Tile, doubleClick?: boolean): Browser {
@@ -57,11 +59,6 @@ export default class BrowserGame extends EventEmitter {
       this.browser.execute(function(): any { return (window as any).scrapeCurrentState() })
         .then(result => this.lastVisibleState = validateVisibleGameState(result.value))
         .then(resolve, reject))
-  }
-
-  private submitOrder(order: Order): Browser {
-    const { from, to, splitArmy } = order
-    return this.clickTile(from, splitArmy).then(() => this.clickTile(to))
   }
 
   private waitForNextTurn(): any {

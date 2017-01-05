@@ -20,8 +20,7 @@ export function getPossibleOrders(gameConfiguration: GameConfiguration, gameStat
   return orders
 }
 
-export function getRandomOrders(gameConfiguration: GameConfiguration, gameState: GameState): Order[] {
-  const possibleOrders = getPossibleOrders(gameConfiguration,gameState)
-  const selectedOrder = sample(possibleOrders)
-  return selectedOrder ? [selectedOrder] : []
+export function getRandomOrder(gameConfiguration: GameConfiguration, gameState: GameState): Order | undefined {
+  const possibleOrders = getPossibleOrders(gameConfiguration, gameState)
+  return sample(possibleOrders)
 }

@@ -10,8 +10,8 @@ export default function playGame(connection: BrowserGame, strategy: Strategy): P
     let gameState: GameState
 
     function takeTurn(): Promise<void> {
-      const orders: Order[] = strategy(gameConfiguration, gameState)
-      return connection.submitOrders(orders).catch(reject)
+      const order: Order | undefined = strategy(gameConfiguration, gameState)
+      return connection.submitOrder(order).catch(reject)
     }
 
     function onGameStart(visibleState: VisibleGameState): void {
