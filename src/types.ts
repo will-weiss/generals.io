@@ -56,6 +56,7 @@ export interface VisibleTileInformation {
   rowIndex: number
   colIndex: number
   isVisible: boolean
+  isUnknownObstacle?: boolean
   isMountain: boolean
   isGeneral: boolean
   isCity: boolean

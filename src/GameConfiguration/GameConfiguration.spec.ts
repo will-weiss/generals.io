@@ -57,4 +57,68 @@ describe('GameConfiguration', () => {
     expect(gameConfiguration.hidden.distances.get(tile0_0)!.get(tile1_2)).to.equal(3)
     expect(gameConfiguration.hidden.distances.get(tile0_0)!.get(tile0_2)).to.equal(4)
   })
+
+  describe('update', () => {
+    it('update distances given new visible gamestate', () => {
+      const firstVisibleGameState: VisibleGameInformation = {
+        turn: 0,
+        game: { over: false, victorious: false },
+        leaderboard: [
+          { army: 151, name: 'Anonymous', land: 1, color: 'red' },
+          { army: 2, name: 'generals.io Tutorial', land: 9, color: 'blue' }
+        ],
+        tiles: [
+          { army: 50, isMountain: false, color: 'red', isCity: true,  isGeneral: true,  colIndex: 0, rowIndex: 0, isVisible: true,  isUnknownObstacle: false },
+          { army: 0,  isMountain: false, color: null,  isCity: false, isGeneral: false, colIndex: 1, rowIndex: 0, isVisible: false, isUnknownObstacle: true  },
+          { army: 0,  isMountain: false, color: null,  isCity: false, isGeneral: false, colIndex: 2, rowIndex: 0, isVisible: false, isUnknownObstacle: false },
+          { army: 0,  isMountain: false, color: null,  isCity: false, isGeneral: false, colIndex: 0, rowIndex: 1, isVisible: false, isUnknownObstacle: false },
+          { army: 0,  isMountain: false, color: null,  isCity: false, isGeneral: false, colIndex: 1, rowIndex: 1, isVisible: false, isUnknownObstacle: false },
+          { army: 0,  isMountain: false, color: null,  isCity: false, isGeneral: false, colIndex: 2, rowIndex: 1, isVisible: false, isUnknownObstacle: false },
+        ],
+      }
+      
+      const newVisibleGameState: VisibleGameInformation = {
+        turn: 1,
+        game: { over: false, victorious: false },
+        leaderboard: [
+          { army: 151, name: 'Anonymous', land: 1, color: 'red' },
+          { army: 2, name: 'generals.io Tutorial', land: 9, color: 'blue' }
+        ],
+        tiles: [
+          { army: 50, isMountain: false, color: 'red', isCity: true,  isGeneral: true,  colIndex: 0, rowIndex: 0, isVisible: true,  isUnknownObstacle: false },
+          { army: 0,  isMountain: false, color: null,  isCity: false, isGeneral: false, colIndex: 1, rowIndex: 0, isVisible: false, isUnknownObstacle: false  },
+          { army: 0,  isMountain: false, color: null,  isCity: false, isGeneral: false, colIndex: 2, rowIndex: 0, isVisible: false, isUnknownObstacle: false },
+          { army: 0,  isMountain: false, color: null,  isCity: false, isGeneral: false, colIndex: 0, rowIndex: 1, isVisible: false, isUnknownObstacle: false },
+          { army: 0,  isMountain: false, color: null,  isCity: false, isGeneral: false, colIndex: 1, rowIndex: 1, isVisible: false, isUnknownObstacle: false },
+          { army: 0,  isMountain: false, color: null,  isCity: false, isGeneral: false, colIndex: 2, rowIndex: 1, isVisible: false, isUnknownObstacle: false },
+        ],
+      }
+
+      const gameConfiguration = new GameConfiguration('Anonymous', firstVisibleGameState)
+
+      const tile0_0 = gameConfiguration.revealed.grid[0][0]
+      const tile0_1 = gameConfiguration.revealed.grid[0][1]
+      const tile0_2 = gameConfiguration.revealed.grid[0][2]
+      const tile1_0 = gameConfiguration.revealed.grid[1][0]
+      const tile1_1 = gameConfiguration.revealed.grid[1][1]
+      const tile1_2 = gameConfiguration.revealed.grid[1][2]
+
+      expect(gameConfiguration.hidden.distances.get(tile0_0)!.get(tile0_0)).to.equal(0)
+      expect(gameConfiguration.hidden.distances.get(tile0_0)!.get(tile0_1)).to.equal(null)
+      expect(gameConfiguration.hidden.distances.get(tile0_0)!.get(tile1_0)).to.equal(1)
+      expect(gameConfiguration.hidden.distances.get(tile0_0)!.get(tile1_1)).to.equal(2)
+      expect(gameConfiguration.hidden.distances.get(tile0_0)!.get(tile1_2)).to.equal(3)
+      expect(gameConfiguration.hidden.distances.get(tile0_0)!.get(tile0_2)).to.equal(4)
+
+      gameConfiguration.update(newVisibleGameState)
+
+      expect(gameConfiguration.hidden.distances.get(tile0_0)!.get(tile0_0)).to.equal(0)
+      expect(gameConfiguration.hidden.distances.get(tile0_0)!.get(tile0_1)).to.equal(1)
+      expect(gameConfiguration.hidden.distances.get(tile0_0)!.get(tile1_0)).to.equal(1)
+      expect(gameConfiguration.hidden.distances.get(tile0_0)!.get(tile1_1)).to.equal(2)
+      expect(gameConfiguration.hidden.distances.get(tile0_0)!.get(tile1_2)).to.equal(3)
+      expect(gameConfiguration.hidden.distances.get(tile0_0)!.get(tile0_2)).to.equal(2)
+
+    })
+  })
 })
