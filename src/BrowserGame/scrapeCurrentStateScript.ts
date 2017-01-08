@@ -33,14 +33,14 @@ export default function scrapeCurrentStateScript(): void {
 
     function scrapeTileState(rowIndex: number, colIndex: number, td: HTMLTableDataCellElement): VisibleTileInformation {
       const tdHasClass = hasClass(td)
-      const isMountain = tdHasClass('mountain')
+      const isKnownMountain = tdHasClass('mountain')
       const isUnknownObstacle = tdHasClass('obstacle')
-      const isVisible = !tdHasClass('fog') || isMountain
+      const isVisible = !tdHasClass('fog') || isKnownMountain
       const isGeneral = tdHasClass('general')
       const isCity = isGeneral || tdHasClass('city')
       const army = getInt(td)
       const color = army ? (getColorOf(td) || 'grey') : null
-      return { rowIndex, colIndex, isVisible, isMountain, isUnknownObstacle, color, isGeneral, isCity, army }
+      return { rowIndex, colIndex, isVisible, isKnownMountain, isUnknownObstacle, color, isGeneral, isCity, army }
     }
 
     function scrapeMapState(): VisibleTileInformation[] {

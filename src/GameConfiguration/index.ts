@@ -8,7 +8,7 @@ function createHiddenGameConfiguration(revealed: RevealedGameConfiguration, firs
   // expect(firstVisibleState).to.have.property('turn').that.equals(0)
 
   const { grid, tiles } = revealed
-  const visibleMountainTiles = firstVisibleState.tiles.filter(visibleTile => visibleTile.isMountain)
+  const visibleMountainTiles = firstVisibleState.tiles.filter(visibleTile => visibleTile.isKnownMountain)
 
   const passable: Set<Tile> = new Set()
   const adjacencies: Map<Tile, Set<Tile>> = new Map()
