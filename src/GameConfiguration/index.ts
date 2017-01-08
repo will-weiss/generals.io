@@ -108,13 +108,6 @@ export default class GameConfiguration implements GameConfiguration {
   update(visibleGameState: VisibleGameInformation): this {
     const { grid, tiles } = this.revealed
     const { passable, unknownObstacles, adjacencies, distances, cities, crowns } = this.hidden
-    
-    // const unknownObstacleTiles = visibleGameState.tiles.filter(visibleTile => visibleTile.isUnknownObstacle)
-
-    // function isUnknownObstacle(tile:Tile): boolean {
-    //   return unknownObstacleTiles.some(unknownObstacleTile =>
-    //     tile.rowIndex === unknownObstacleTile.rowIndex && tile.colIndex === unknownObstacleTile.colIndex)
-    // }
 
     function tileAt(rowIndex: number, colIndex: number): Tile | undefined {
       const row = grid[rowIndex]
@@ -167,7 +160,6 @@ export default class GameConfiguration implements GameConfiguration {
           }
         }
       }
-
     }
 
     function setNumericDistances(tile: Tile): void {
@@ -193,11 +185,6 @@ export default class GameConfiguration implements GameConfiguration {
       setNumericDistances(tile)
       if (!visibleTile.isKnownMountain) markTileAsPassable(tile)
     })
-
-    // for tile in visibleTiles:
-    //  if isUnknownObsticle(tile):
-
-
 
     return this
   }
