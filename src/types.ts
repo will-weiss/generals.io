@@ -28,6 +28,7 @@ export interface HiddenGameConfiguration {
   cities: Set<Tile>
   crowns: Map<LivePlayerColor, Tile>
   passable: Set<Tile>
+  unknownObstacles: Set<Tile>
   adjacencies: Map<Tile, Set<Tile>>
   distances: Map<Tile, Map<Tile, number>>
 }

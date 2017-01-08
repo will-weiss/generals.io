@@ -104,7 +104,7 @@ describe('GameConfiguration', () => {
       const tile1_2 = gameConfiguration.revealed.grid[1][2]
 
       expect(gameConfiguration.hidden.distances.get(tile0_0)!.get(tile0_0)).to.equal(0)
-      expect(gameConfiguration.hidden.distances.get(tile0_0)!.get(tile0_1)).to.equal(null)
+      expect(gameConfiguration.hidden.distances.get(tile0_0)!.get(tile0_1)).to.equal(undefined)
       expect(gameConfiguration.hidden.distances.get(tile0_0)!.get(tile1_0)).to.equal(1)
       expect(gameConfiguration.hidden.distances.get(tile0_0)!.get(tile1_1)).to.equal(2)
       expect(gameConfiguration.hidden.distances.get(tile0_0)!.get(tile1_2)).to.equal(3)
