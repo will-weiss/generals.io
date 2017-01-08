@@ -115,12 +115,16 @@ export default class GameConfiguration implements GameConfiguration {
       return row && row[colIndex]
     }
 
+    function setDistance(fromTile: Tile, toTile: Tile, distance: number): void {
+      distances.get(fromTile)!.set(toTile, distance)
+      distances.get(toTile)!.set(fromTile, distance)
+    }
+
     function maybeAddAdjacency(tile: Tile, otherTile: Tile | undefined): void {
       if (otherTile && passable.has(otherTile)) {
         adjacencies.get(tile)!.add(otherTile)
         adjacencies.get(otherTile)!.add(tile)
-        distances.get(tile)!.set(otherTile, 1)
-        distances.get(otherTile)!.set(tile, 1)
+        setDistance(tile, otherTile, 1)
       }
     }
 
@@ -147,20 +151,13 @@ export default class GameConfiguration implements GameConfiguration {
           expect(firstLeg).to.be.a('number')
           expect(secondLeg).to.be.a('number')
           const possibleNewDistance = distances.get(firstTile)!.get(tile) + distances.get(tile)!.get(secondTile)
-          if (possibleNewDistance < oldDistance) {
-            distances.get(firstTile)!.set(secondTile, possibleNewDistance)
-            distances.get(secondTile)!.set(firstTile, possibleNewDistance)
-          }
+          if (possibleNewDistance < oldDistance) setDistance(firstTile, secondTile, possibleNewDistance)
         }
-
       }
     }
 
     function setNumericDistances(tile: Tile): void {
-      tiles.forEach(otherTile => {
-        distances.get(tile)!.set(otherTile, Infinity)
-        distances.get(otherTile)!.set(tile, Infinity)
-      })
+      tiles.forEach(otherTile =>  setDistance(tile, otherTile, Infinity))
     }
 
     visibleGameState.tiles.forEach(visibleTile => {
