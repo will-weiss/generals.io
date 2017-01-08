@@ -29,10 +29,10 @@ export default function validateVisibleGameState(visibleState: VisibleGameInform
     expect(visibleTile).to.have.property('isVisible').that.is.a('boolean')
     expect(visibleTile).to.have.property('isCity').that.is.a('boolean')
     expect(visibleTile).to.have.property('isGeneral').that.is.a('boolean')
-    expect(visibleTile).to.have.property('isMountain').that.is.a('boolean')
+    expect(visibleTile).to.have.property('isKnownMountain').that.is.a('boolean')
     expect(visibleTile).to.have.property('color').that.is.oneOf(possibleTileColorsThisGame)
 
-    const { rowIndex, colIndex, army, color, isCity, isGeneral, isVisible, isMountain } = visibleTile
+    const { rowIndex, colIndex, army, color, isCity, isGeneral, isVisible, isKnownMountain } = visibleTile
 
     const coordinates = `(${rowIndex},${colIndex})`
     if (observedCoordinates.has(coordinates)) throw new Error(`Duplicate tiles with coordinates: ${coordinates}`)
@@ -41,11 +41,11 @@ export default function validateVisibleGameState(visibleState: VisibleGameInform
     height = Math.max(height, visibleTile.rowIndex + 1)
     width = Math.max(width, visibleTile.colIndex + 1)
 
-    const isInvisibleOrImpassable = !isVisible || isMountain
+    const isInvisibleOrImpassable = !isVisible || isKnownMountain
     const hasArmy = army > 0
     const hasColor = !!color
 
-    expect(!isMountain              || isVisible).to.be.true
+    expect(!isKnownMountain         || isVisible).to.be.true
     expect(!isGeneral               || isCity).to.be.true
     expect(!isCity                  || hasArmy).to.be.true
     expect(!isInvisibleOrImpassable || !hasArmy).to.be.true

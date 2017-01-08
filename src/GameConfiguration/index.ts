@@ -1,5 +1,6 @@
 import createRevealedGameConfiguration from './createRevealedGameConfiguration'
 import { Tile, HiddenGameConfiguration, VisibleGameInformation, RevealedGameConfiguration, LivePlayerColor } from '../types'
+import { expect } from 'chai'
 
 
 function createHiddenGameConfiguration(revealed: RevealedGameConfiguration, firstVisibleState: VisibleGameInformation): HiddenGameConfiguration {
@@ -8,15 +9,27 @@ function createHiddenGameConfiguration(revealed: RevealedGameConfiguration, firs
   // expect(firstVisibleState).to.have.property('turn').that.equals(0)
 
   const { grid, tiles } = revealed
-  const visibleMountainTiles = firstVisibleState.tiles.filter(visibleTile => visibleTile.isMountain)
+  const knownMountainTiles = firstVisibleState.tiles.filter(visibleTile => visibleTile.isKnownMountain)
+  const unknownObstacleTiles = firstVisibleState.tiles.filter(visibleTile => visibleTile.isUnknownObstacle)
+
 
   const passable: Set<Tile> = new Set()
+  const unknownObstacles: Set<Tile> = new Set()
   const adjacencies: Map<Tile, Set<Tile>> = new Map()
   const distances: Map<Tile, Map<Tile, number>> = new Map()
+  
+  function isKnownMountain(tile:Tile): boolean {
+    return knownMountainTiles.some(knownMountainTile =>
+      tile.rowIndex === knownMountainTile.rowIndex && tile.colIndex === knownMountainTile.colIndex)
+  }
 
-  function isPassable(tile: Tile): boolean {
-    return !visibleMountainTiles.some(visibleMountain =>
-      tile.rowIndex === visibleMountain.rowIndex && tile.colIndex === visibleMountain.colIndex)
+  function isUnknownObstacle(tile:Tile): boolean {
+    return unknownObstacleTiles.some(unknownObstacleTile =>
+      tile.rowIndex === unknownObstacleTile.rowIndex && tile.colIndex === unknownObstacleTile.colIndex)
+  }
+
+  function isKnownPassable(tile: Tile): boolean {
+    return !isKnownMountain(tile) && !isUnknownObstacle(tile)
   }
 
   function tileAt(rowIndex: number, colIndex: number): Tile | undefined {
@@ -24,10 +37,18 @@ function createHiddenGameConfiguration(revealed: RevealedGameConfiguration, firs
     return row && row[colIndex]
   }
 
-  tiles.forEach(tile => { if (isPassable(tile)) passable.add(tile) })
+  tiles.forEach(tile => { if (isKnownPassable(tile)) passable.add(tile) })
+  tiles.forEach(tile => { if (isUnknownObstacle(tile)) unknownObstacles.add(tile) })
   tiles.forEach(tile => adjacencies.set(tile, new Set()))
   tiles.forEach(tile => distances.set(tile, new Map()))
   tiles.forEach(from => tiles.forEach(to => distances.get(from)!.set(to, Infinity)))
+
+  function maybeAddAdjacency(tile: Tile, otherTile: Tile | undefined): void {
+    if (otherTile && passable.has(otherTile)) {
+      adjacencies.get(tile)!.add(otherTile)
+      adjacencies.get(otherTile)!.add(tile)
+    }
+  }
 
   passable.forEach(tile => {
     distances.get(tile)!.set(tile, 0)
@@ -36,10 +57,17 @@ function createHiddenGameConfiguration(revealed: RevealedGameConfiguration, firs
     const south = tileAt(rowIndex + 1, colIndex)
     const west  = tileAt(rowIndex, colIndex - 1)
     const east  = tileAt(rowIndex, colIndex + 1)
-    if (north && passable.has(north)) adjacencies.get(tile)!.add(north)
-    if (south && passable.has(south)) adjacencies.get(tile)!.add(south)
-    if (west  && passable.has(west))  adjacencies.get(tile)!.add(west)
-    if (east  && passable.has(east))  adjacencies.get(tile)!.add(east)
+    maybeAddAdjacency(tile, north)
+    maybeAddAdjacency(tile, south)
+    maybeAddAdjacency(tile, west)
+    maybeAddAdjacency(tile, east)
+  })
+
+  unknownObstacles.forEach(tile => {
+    tiles.forEach(otherTile => {
+      distances.get(tile)!.set(otherTile, undefined)
+      distances.get(otherTile)!.set(tile, undefined)
+    })
   })
 
   function walk(): void {
@@ -64,7 +92,7 @@ function createHiddenGameConfiguration(revealed: RevealedGameConfiguration, firs
 
   walk()
 
-  return { passable, adjacencies, distances, cities: new Set(), crowns: new Map() }
+  return { passable, unknownObstacles, adjacencies, distances, cities: new Set(), crowns: new Map() }
 }
 
 
@@ -79,12 +107,73 @@ export default class GameConfiguration implements GameConfiguration {
   }
 
   update(visibleGameState: VisibleGameInformation): this {
+    const { grid, tiles } = this.revealed
+    const { passable, unknownObstacles, adjacencies, distances, cities, crowns } = this.hidden
+
+    function tileAt(rowIndex: number, colIndex: number): Tile | undefined {
+      const row = grid[rowIndex]
+      return row && row[colIndex]
+    }
+
+    function setDistance(fromTile: Tile, toTile: Tile, distance: number): void {
+      distances.get(fromTile)!.set(toTile, distance)
+      distances.get(toTile)!.set(fromTile, distance)
+    }
+
+    function maybeAddAdjacency(tile: Tile, rowAdjustment: number, colAdjustment: number): void {
+      const { rowIndex, colIndex } = tile
+      const otherTile = tileAt(rowIndex + rowAdjustment, colIndex + colAdjustment)
+      if (otherTile && passable.has(otherTile)) {
+        adjacencies.get(tile)!.add(otherTile)
+        adjacencies.get(otherTile)!.add(tile)
+        setDistance(tile, otherTile, 1)
+      }
+    }
+
+    function markTileAsPassable(tile: Tile): void {
+      passable.add(tile)
+      distances.get(tile)!.set(tile, 0)
+
+      maybeAddAdjacency(tile, -1, 0)
+      maybeAddAdjacency(tile, 1, 0)
+      maybeAddAdjacency(tile, 0, -1)
+      maybeAddAdjacency(tile, 0, 1)
+
+      // update other distances which may now be shorter because of this new tile
+      for (const firstTile of passable) {
+        for (const secondTile of passable) {
+          const oldDistance = distances.get(firstTile)!.get(secondTile)
+          const firstLeg = distances.get(firstTile)!.get(tile)
+          const secondLeg = distances.get(tile)!.get(secondTile)
+          expect(firstLeg).to.be.a('number')
+          expect(secondLeg).to.be.a('number')
+          const possibleNewDistance = distances.get(firstTile)!.get(tile) + distances.get(tile)!.get(secondTile)
+          if (possibleNewDistance < oldDistance) setDistance(firstTile, secondTile, possibleNewDistance)
+        }
+      }
+    }
+
+    function setNumericDistances(tile: Tile): void {
+      tiles.forEach(otherTile =>  setDistance(tile, otherTile, Infinity))
+    }
+
     visibleGameState.tiles.forEach(visibleTile => {
       if (!visibleTile.isCity) return
-      const tile = this.revealed.grid[visibleTile.rowIndex][visibleTile.colIndex]
-      this.hidden.cities.add(tile)
-      if (visibleTile.isGeneral) this.hidden.crowns.set(visibleTile.color as LivePlayerColor, tile)
+      const tile = grid[visibleTile.rowIndex][visibleTile.colIndex]
+      cities.add(tile)
+      if (visibleTile.isGeneral) crowns.set(visibleTile.color as LivePlayerColor, tile)
     })
+
+    visibleGameState.tiles.forEach(visibleTile => {
+      if (visibleTile.isUnknownObstacle) return
+      const tile = grid[visibleTile.rowIndex][visibleTile.colIndex]
+      const wasAlreadySeen = !unknownObstacles.has(tile)
+      if (wasAlreadySeen) return
+      unknownObstacles.delete(tile)
+      setNumericDistances(tile)
+      if (!visibleTile.isKnownMountain) markTileAsPassable(tile)
+    })
+
     return this
   }
 }
