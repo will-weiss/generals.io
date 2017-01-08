@@ -118,6 +118,8 @@ export default class GameConfiguration implements GameConfiguration {
       if (otherTile && passable.has(otherTile)) {
         adjacencies.get(tile)!.add(otherTile)
         adjacencies.get(otherTile)!.add(tile)
+        distances.get(tile)!.set(otherTile, 1)
+        distances.get(otherTile)!.set(tile, 1)
       }
     }
 
@@ -129,25 +131,11 @@ export default class GameConfiguration implements GameConfiguration {
       const south = tileAt(rowIndex + 1, colIndex)
       const west  = tileAt(rowIndex, colIndex - 1)
       const east  = tileAt(rowIndex, colIndex + 1)
+      
       maybeAddAdjacency(tile, north)
       maybeAddAdjacency(tile, south)
       maybeAddAdjacency(tile, west)
       maybeAddAdjacency(tile, east)
-
-      // update distances to this new tile
-      for (const otherTile of passable) {
-        for (const adjacency of adjacencies.get(tile)!) {
-          for (const [otherTile, adjacencyDistance] of distances.get(adjacency)!.entries()) {
-          const possiblySmallerDistance = adjacencyDistance + 1 
-          const currentDistance = distances.get(tile)!.get(otherTile)
-          const performUpdate = possiblySmallerDistance < currentDistance
-          if(performUpdate) {
-              distances.get(tile)!.set(otherTile, possiblySmallerDistance)
-              distances.get(otherTile)!.set(tile, possiblySmallerDistance)             
-            }
-          }
-        }
-      }
 
       // update other distances which may now be shorter because of this new tile
       for (const firstTile of passable) {
