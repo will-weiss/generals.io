@@ -45,7 +45,7 @@ export default function validateVisibleGameState(visibleState: VisibleGameInform
     const hasArmy = army > 0
     const hasColor = !!color
 
-    expect(!isKnownMountain              || isVisible).to.be.true
+    expect(!isKnownMountain         || isVisible).to.be.true
     expect(!isGeneral               || isCity).to.be.true
     expect(!isCity                  || hasArmy).to.be.true
     expect(!isInvisibleOrImpassable || !hasArmy).to.be.true
