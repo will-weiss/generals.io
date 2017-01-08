@@ -1,5 +1,6 @@
 import createRevealedGameConfiguration from './createRevealedGameConfiguration'
 import { Tile, HiddenGameConfiguration, VisibleGameInformation, RevealedGameConfiguration, LivePlayerColor } from '../types'
+import { expect } from 'chai'
 
 
 function createHiddenGameConfiguration(revealed: RevealedGameConfiguration, firstVisibleState: VisibleGameInformation): HiddenGameConfiguration {
@@ -141,12 +142,17 @@ export default class GameConfiguration implements GameConfiguration {
       for (const firstTile of passable) {
         for (const secondTile of passable) {
           const oldDistance = distances.get(firstTile)!.get(secondTile)
+          const firstLeg = distances.get(firstTile)!.get(tile)
+          const secondLeg = distances.get(tile)!.get(secondTile)
+          expect(firstLeg).to.be.a('number')
+          expect(secondLeg).to.be.a('number')
           const possibleNewDistance = distances.get(firstTile)!.get(tile) + distances.get(tile)!.get(secondTile)
           if (possibleNewDistance < oldDistance) {
             distances.get(firstTile)!.set(secondTile, possibleNewDistance)
             distances.get(secondTile)!.set(firstTile, possibleNewDistance)
           }
         }
+
       }
     }
 
