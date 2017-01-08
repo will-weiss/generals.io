@@ -120,7 +120,9 @@ export default class GameConfiguration implements GameConfiguration {
       distances.get(toTile)!.set(fromTile, distance)
     }
 
-    function maybeAddAdjacency(tile: Tile, otherTile: Tile | undefined): void {
+    function maybeAddAdjacency(tile: Tile, rowAdjustment: number, colAdjustment: number): void {
+      const { rowIndex, colIndex } = tile
+      const otherTile = tileAt(rowIndex + rowAdjustment, colIndex + colAdjustment)
       if (otherTile && passable.has(otherTile)) {
         adjacencies.get(tile)!.add(otherTile)
         adjacencies.get(otherTile)!.add(tile)
@@ -131,16 +133,11 @@ export default class GameConfiguration implements GameConfiguration {
     function markTileAsPassable(tile: Tile): void {
       passable.add(tile)
       distances.get(tile)!.set(tile, 0)
-      const { rowIndex, colIndex } = tile
-      const north = tileAt(rowIndex - 1, colIndex)
-      const south = tileAt(rowIndex + 1, colIndex)
-      const west  = tileAt(rowIndex, colIndex - 1)
-      const east  = tileAt(rowIndex, colIndex + 1)
-      
-      maybeAddAdjacency(tile, north)
-      maybeAddAdjacency(tile, south)
-      maybeAddAdjacency(tile, west)
-      maybeAddAdjacency(tile, east)
+
+      maybeAddAdjacency(tile, -1, 0)
+      maybeAddAdjacency(tile, 1, 0)
+      maybeAddAdjacency(tile, 0, -1)
+      maybeAddAdjacency(tile, 0, 1)
 
       // update other distances which may now be shorter because of this new tile
       for (const firstTile of passable) {
