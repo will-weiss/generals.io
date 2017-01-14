@@ -38,6 +38,11 @@ export interface GameConfiguration {
   hidden: HiddenGameConfiguration
 }
 
+export interface CompleteGameInformation {
+  config: GameConfiguration
+  state: GameState
+}
+
 export interface PlayerStatus {
   alive: boolean
   land: number
@@ -88,4 +93,4 @@ export interface Order {
   splitArmy: boolean
 }
 
-export type Strategy = (gameConfiguration: GameConfiguration, gameState: GameState) => Order | undefined
+export type Strategy = (gameInfo: CompleteGameInformation) => Order | undefined

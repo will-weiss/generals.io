@@ -1,17 +1,21 @@
 import _ = require('lodash')
 import { sample } from 'lodash'
 import getPossibleOrders from './getPossibleOrders'
-import { Order, GameState, GameConfiguration } from '../types'
+import { Order, CompleteGameInformation } from '../types'
 
 
-export function getRandomOrder(gameConfiguration: GameConfiguration, gameState: GameState): Order | undefined {
-  const possibleOrders = getPossibleOrders(gameConfiguration, gameState)
+export function getRandomOrder(gameInfo: CompleteGameInformation): Order | undefined {
+  const possibleOrders = getPossibleOrders(gameInfo)
   return sample(possibleOrders)
 }
 
-export function getRandomOrderForLargestArmy(gameConfiguration: GameConfiguration, gameState: GameState): Order | undefined {
-  const possibleOrders = getPossibleOrders(gameConfiguration, gameState)
-  const myArmies = gameState.armies.get(gameConfiguration.revealed.myColor)!
+export function getRandomOrderForLargestArmy(gameInfo: CompleteGameInformation): Order | undefined {
+  const { armies } = gameInfo.state
+  const { myColor } = gameInfo.config.revealed
+
+  const myArmies = armies.get(myColor)!
+  const possibleOrders = getPossibleOrders(gameInfo)
+
   const largestArmySize = _(possibleOrders).map(order => myArmies.get(order.from)!).max()
   const possibleOrdersForLargestArmyWithoutSplitting = _(possibleOrders)
     .filter(order => !order.splitArmy)

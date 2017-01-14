@@ -1,14 +1,18 @@
-import { Order, GameState, GameConfiguration } from '../types'
+import { Order, CompleteGameInformation } from '../types'
 
 
-export default function getPossibleOrders(gameConfiguration: GameConfiguration, gameState: GameState): Order[] {
-  const myArmies = gameState.armies.get(gameConfiguration.revealed.myColor)!
+export default function getPossibleOrders(gameInfo: CompleteGameInformation): Order[] {
+  const { armies } = gameInfo.state
+  const { myColor } = gameInfo.config.revealed
+  const { adjacencies } = gameInfo.config.hidden
+
+  const myArmies = armies.get(myColor)!
   const orders: Order[] = []
 
   for (const [from, armySize] of myArmies.entries()) {
     if (armySize < 2) continue
-    const adjacencies = gameConfiguration.hidden.adjacencies.get(from)!
-    for (const to of adjacencies) {
+    const adjacenciesFrom = adjacencies.get(from)!
+    for (const to of adjacenciesFrom) {
       orders.push(
         { from, to, splitArmy: false },
         { from, to, splitArmy: true }
