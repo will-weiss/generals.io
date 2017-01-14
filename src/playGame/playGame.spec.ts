@@ -3,10 +3,10 @@ import { cloneDeep } from 'lodash'
 import { stub, SinonStub } from 'sinon'
 import { EventEmitter } from 'events'
 import sampleFirstTurnVisibleGameInformation from '../sampleFirstTurnVisibleGameInformation'
-import playGame from './index'
+import { playGameOnceStarted } from './index'
 
 
-describe('playGame', () => {
+describe('playGameOnceStarted', () => {
   it('listens for game events, passes visible game states to a particular strategy submits calculated orders, and resolves with the last visible game state when the game is over', async () => {
     const connection = new EventEmitter() as EventEmitter & { submitOrder: SinonStub }
     connection.submitOrder = stub().returns(Promise.resolve())
@@ -30,7 +30,7 @@ describe('playGame', () => {
       })) as Promise<any>
     }
 
-    const inProgressGame = playGame(connection as any, strategy)
+    const inProgressGame = playGameOnceStarted(connection as any, strategy)
 
     await tickThenEmit('start', sampleFirstTurnVisibleGameInformation)
     await tickThenEmit('nextTurn', nextTurnGameState)

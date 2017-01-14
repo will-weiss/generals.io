@@ -1,6 +1,5 @@
 import vantage = require('vantage')
-import playTutorial from './playTutorial'
-import play1v1 from './play1v1'
+import { play1v1, playTutorial } from './playGame'
 
 
 const cli = vantage()

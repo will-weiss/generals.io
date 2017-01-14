@@ -31,12 +31,16 @@ export default class BrowserGame extends EventEmitter {
     await this.clickTile(to)
   }
 
-  async beginTutorial(): Promise<void> {
-    await this.click('button.big')
-    await this.browser.waitForVisible('td.selectable.general', 1000)
+  async startPlayingGame(): Promise<void> {
     await this.scrapeCurrentState()
     this.emit('start', this.lastVisibleState)
     await this.waitForNextTurn()
+  }
+
+  async beginTutorial(): Promise<void> {
+    await this.click('button.big')
+    await this.browser.waitForVisible('td.selectable.general', 1000)
+    await this.startPlayingGame()
   }
 
   async begin1v1Game(): Promise<void> {
@@ -44,9 +48,7 @@ export default class BrowserGame extends EventEmitter {
     await this.browser.waitForVisible('#game-modes', 1000)
     await this.click('#game-modes > center > button.inverted:first-of-type ~ button')
     await this.waitForGameToStart()
-    await this.scrapeCurrentState()
-    this.emit('start', this.lastVisibleState)
-    await this.waitForNextTurn()
+    await this.startPlayingGame()
   }
 
   private async waitForGameToStart(): Promise<any> {
