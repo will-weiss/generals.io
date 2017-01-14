@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import vantage = require('vantage')
 import { play1v1, playTutorial } from './playGame'
 
@@ -20,6 +21,18 @@ cli
   .delimiter('dookiebot~$')
   .listen(8010)
   .show()
+=======
+import BrowserGame from './BrowserGame'
+import playGame from './playGame'
+import { earlyGame } from './Strategy'
+import { VisibleGameInformation } from './types'
+
+
+function main(): Promise<VisibleGameInformation> {
+  const connection = new BrowserGame()
+  return playGame(connection, earlyGame)
+}
+>>>>>>> 069d7a8... added the step away function in strategy
 
 
 process.on('unhandledRejection', err => console.error(err))
