@@ -1,4 +1,4 @@
-import BrowserGame from './BrowserGame'
+import connection from './connection'
 import playGame from './playGame'
 import * as Strategy from './Strategy'
 
@@ -12,9 +12,10 @@ export default function playTutorial(args, callback): void {
       message: 'Choose a strategy: ',
       choices: strategies
     }
-  ], ({ strategy }) => {
-    const connection = new BrowserGame()
+  ], async ({ strategy }) => {
+    await connection.loading
     console.log('Starting the tutorial...')
+    connection.beginTutorial()
     return playGame(connection, Strategy[strategy])
       .then(finalState => console.log('Tutorial over', finalState), callback())
       .catch(callback)

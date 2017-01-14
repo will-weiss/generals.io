@@ -7,12 +7,12 @@ const cli = vantage()
 
 
 cli
-  .command('play-tutorial')
+  .command('tutorial')
   .description('Plays the tutorial')
   .action(playTutorial)
 
 cli
-  .command('play-1v1')
+  .command('one-v-one')
   .description('Plays a 1v1 game')
   .action(play1v1)
 
