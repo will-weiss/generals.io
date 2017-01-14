@@ -35,3 +35,5 @@ export const sampleSecondTurnVisibleGameInformation: VisibleGameInformation = de
     { army: 0,  isKnownMountain: false, color: null,  isCity: false, isGeneral: false, colIndex: 2, rowIndex: 1, isVisible: false },
   ],
 })
+
+

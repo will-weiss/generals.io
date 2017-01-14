@@ -6,23 +6,23 @@ import { Order, GameState, Strategy, VisibleGameInformation } from '../types'
 
 export default function playGame(connection: BrowserGame, strategy: Strategy): Promise<VisibleGameInformation> {
   return new Promise((resolve, reject) => {
-    let gameConfiguration: GameConfiguration
-    let gameState: GameState
+    let config: GameConfiguration
+    let state: GameState
 
     function takeTurn(): Promise<void> {
-      const order: Order | undefined = strategy(gameConfiguration, gameState)
+      const order: Order | undefined = strategy(gameInfomration)
       return connection.submitOrder(order).catch(reject)
     }
 
     function onGameStart(visibleState: VisibleGameInformation): void {
-      gameConfiguration = new GameConfiguration('Anonymous', visibleState)
-      gameState = createGameState(gameConfiguration, visibleState)
+      config = new GameConfiguration('Anonymous', visibleState)
+      state = createGameState(config, visibleState)
       takeTurn()
     }
 
     function onNextTurn(visibleState: VisibleGameInformation): void {
-      gameConfiguration = gameConfiguration.update(visibleState)
-      gameState = createGameState(gameConfiguration, visibleState)
+      config = config.update(visibleState)
+      state = createGameState(config, visibleState)
       takeTurn()
     }
 

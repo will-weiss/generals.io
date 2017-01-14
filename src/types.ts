@@ -14,6 +14,11 @@ export interface Tile {
   colIndex: number
 }
 
+export interface CompleteGameInformation {
+  config: GameConfiguration
+  state: GameState
+}
+
 export interface RevealedGameConfiguration {
   playerColors: LivePlayerColor[]
   height: number
@@ -88,4 +93,4 @@ export interface Order {
   splitArmy: boolean
 }
 
-export type Strategy = (gameConfiguration: GameConfiguration, gameState: GameState) => Order | undefined
+export type Strategy = (gameInformation: CompleteGameInformation) => Order | undefined
