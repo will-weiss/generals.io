@@ -5,43 +5,32 @@ import { Order, GameState, Strategy, VisibleGameInformation } from '../types'
 import connection from '../connection'
 import * as Strategies from '../Strategy'
 
+
 const strategies = Object.keys(Strategies)
 
+interface GamePlayOpts {
+  onStartMessage: string
+  onEndMessage: string
+  getStrategy: (cli: any) => Promise<string>
+  beginGame: () => void
+}
 
-export function playGame(opts, args, callback): void {
-  this.prompt([
-    {
-      type: 'list',
-      name: 'strategy',
-      message: 'Choose a strategy: ',
-      choices: strategies
-    }
-  ], async ({ strategy }) => {
+
+function promptUserForStrategy(cli): Promise<string> {
+  const prompt = [{ type: 'list', name: 'strategy', message: 'Choose a strategy: ', choices: strategies }]
+  return new Promise(resolve => cli.prompt(prompt, ({ strategy }) => resolve(strategy)))
+}
+
+function playGameUsing(opts: GamePlayOpts) {
+  return async function playGame(cli): Promise<void> {
+    const strategyKey = await opts.getStrategy(cli)
+    const strategy = Strategies[strategyKey]
     await connection.loading
     console.log(opts.onStartMessage)
     opts.beginGame()
-    return playGameOnceStarted(connection, Strategies[strategy])
-      .then(finalState => console.log(opts.onEndMessage, finalState), callback())
-      .catch(callback)
-  })
-}
-
-export function play1v1(args, callback): void {
-  const opts = {
-    onStartMessage: 'Starting a 1v1 game...',
-    onEndMessage: 'Game over',
-    beginGame: () => connection.begin1v1Game(),
+    await playGameOnceStarted(connection, strategy)
+    console.log(opts.onEndMessage)
   }
-  playGame.call(this, opts, args, callback)
-}
-
-export function playTutorial(args, callback): void {
-  const opts = {
-    onStartMessage: 'Starting the tutorial...',
-    onEndMessage: 'Tutorial over',
-    beginGame: () => connection.beginTutorial(),
-  }
-  playGame.call(this, opts, args, callback)
 }
 
 export function playGameOnceStarted(connection: BrowserGame, strategy: Strategy): Promise<VisibleGameInformation> {
@@ -74,3 +63,23 @@ export function playGameOnceStarted(connection: BrowserGame, strategy: Strategy)
 }
 
 
+export const play1v1 = playGameUsing({
+  onStartMessage: 'Starting a 1v1 game...',
+  onEndMessage: 'Game over',
+  beginGame: () => connection.begin1v1Game(),
+  getStrategy: promptUserForStrategy
+})
+
+export const playTutorial = playGameUsing({
+  onStartMessage: 'Starting the tutorial...',
+  onEndMessage: 'Tutorial over',
+  beginGame: () => connection.beginTutorial(),
+  getStrategy: promptUserForStrategy
+})
+
+export const beatTutorial = playGameUsing({
+  onStartMessage: 'Starting the tutorial...',
+  onEndMessage: 'Tutorial over',
+  beginGame: () => connection.beginTutorial(),
+  getStrategy: () => Promise.resolve('beatTutorial')
+})
