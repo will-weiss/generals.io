@@ -1,12 +1,11 @@
+import getMyArmies from '../getMyArmies'
 import { Order, CompleteGameInformation } from '../../types'
 
 
 export default function getPossibleOrders(gameInfo: CompleteGameInformation): Order[] {
-  const { armies } = gameInfo.state
-  const { myColor } = gameInfo.config.revealed
   const { adjacencies } = gameInfo.config.hidden
 
-  const myArmies = armies.get(myColor)!
+  const myArmies = getMyArmies(gameInfo)
   const orders: Order[] = []
 
   for (const [from, armySize] of myArmies.entries()) {
