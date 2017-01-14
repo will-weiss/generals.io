@@ -49,6 +49,8 @@ export interface PlayerStatus {
   army: number
 }
 
+export type Armies = Map<Tile, number>
+
 export interface GameState {
   turn: number
   gameOver: boolean

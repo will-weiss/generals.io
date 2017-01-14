@@ -1,9 +1,9 @@
 import { expect } from 'chai'
-import sampleFirstTurnVisibleGameInformation from '../sampleFirstTurnVisibleGameInformation'
-import getPossibleOrders from './getPossibleOrders'
-import { Order, GameState } from '../types'
-import GameConfiguration from '../GameConfiguration'
-import createGameState from '../GameState'
+import sampleFirstTurnVisibleGameInformation from '../../sampleFirstTurnVisibleGameInformation'
+import { Order, GameState } from '../../types'
+import GameConfiguration from '../../GameConfiguration'
+import createGameState from '../../GameState'
+import getPossibleOrders from './index'
 
 
 describe('getPossibleOrders', () => {
