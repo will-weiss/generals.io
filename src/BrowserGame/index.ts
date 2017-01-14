@@ -73,6 +73,11 @@ const createConnection = (): Connection => {
     return result.value as VisibleGameInformation
   }
 
+  async function orderHasResolved(lastOrder: Order): Promise<boolean> {
+    const orderSelector = orderSelectorOfTile(lastOrder.from)
+    return !(await browser.isExisting(orderSelector))
+  }
+
   async function turnHasIncremented(lastTurn: number): Promise<boolean> {
     const turnCounterText = await browser.getText('#turn-counter') as string
     const match = turnCounterText.match(/\d+/)
@@ -81,14 +86,8 @@ const createConnection = (): Connection => {
   }
 
   async function waitForTick(lastOrder: Order | undefined, lastVisibleState: VisibleGameInformation | undefined): Promise<void> {
-    if (!lastOrder) {
-      const lastTurn = lastVisibleState!.turn
-      await browser.waitUntil(async () => turnHasIncremented(lastTurn), 20000)
-    } else {
-      const orderSelector = orderSelectorOfTile(lastOrder.from)
-      const orderHasResolved = async () => !(await browser.isExisting(orderSelector))
-      await browser.waitUntil(orderHasResolved, 20000)
-    }
+    const waitUntil = lastOrder ? () => orderHasResolved(lastOrder) : () => turnHasIncremented(lastVisibleState!.turn)
+    await browser.waitUntil(waitUntil, 20000)
   }
 }
 
@@ -138,7 +137,7 @@ export default class BrowserGame extends EventEmitter {
 
   private async afterTick(): Promise<void> {
     await this.scrapeCurrentState()
-    this.emit('nextTurn', this.lastVisibleState)
+    this.emit('nextTick', this.lastVisibleState)
     if (this.lastVisibleState!.game.over) this.emit('gameOver')
   }
 }

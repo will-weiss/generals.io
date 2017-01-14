@@ -49,14 +49,14 @@ export function playGameOnceStarted(connection: BrowserGame, strategy: Strategy)
       takeTurn()
     }
 
-    function onNextTurn(visibleState: VisibleGameInformation): void {
+    function onnextTick(visibleState: VisibleGameInformation): void {
       gameConfiguration = gameConfiguration.update(visibleState)
       gameState = createGameState(gameConfiguration, visibleState)
       takeTurn()
     }
 
     connection.once('start', onGameStart)
-    connection.on('nextTurn', onNextTurn)
+    connection.on('nextTick', onnextTick)
     connection.on('gameOver', resolve)
     connection.on('error', error => reject(error))
   })
