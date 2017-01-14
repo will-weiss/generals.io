@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import sampleFirstTurnVisibleGameInformation from '../sampleFirstTurnVisibleGameInformation'
-import { getPossibleOrders } from './index'
+import getPossibleOrders from './getPossibleOrders'
 import { Order, GameState } from '../types'
 import GameConfiguration from '../GameConfiguration'
 import createGameState from '../GameState'

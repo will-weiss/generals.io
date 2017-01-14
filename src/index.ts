@@ -1,14 +1,20 @@
-import BrowserGame from './BrowserGame'
-import playGame from './playGame'
-import { getRandomOrderForLargestArmy } from './Strategy'
-import { VisibleGameInformation } from './types'
+import vantage = require('vantage')
+import playTutorial from './playTutorial'
 
 
-function main(): Promise<VisibleGameInformation> {
-  const connection = new BrowserGame()
-  return playGame(connection, getRandomOrderForLargestArmy)
-}
+const cli = vantage()
 
-main().then(console.log, console.error)
+
+cli
+  .command('play-tutorial')
+  .description('Plays the tutorial')
+  .action(playTutorial)
+
+
+cli
+  .delimiter('dookiebot~$')
+  .listen(8010)
+  .show()
+
 
 process.on('unhandledRejection', err => console.error(err))
