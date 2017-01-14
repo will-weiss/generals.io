@@ -10,105 +10,135 @@ type Browser = webdriverio.Client<void>
 const generalsIoUrl = 'http://generals.io'
 const webdriverOpts = { desiredCapabilities: { browserName: 'chrome' } }
 
+function selectorOfTile(tile: Tile): string {
+  return `#map > tbody > tr:nth-child(${tile.rowIndex + 1}) > td:nth-child(${tile.colIndex + 1})`
+}
+
+function orderSelectorOfTile(tile: Tile): string {
+  return `${selectorOfTile(tile)} > div.center-vertical`
+}
+
+interface Connection {
+  loading: Promise<void>
+  submitOrder(order: Order | undefined): Promise<void>
+  beginTutorial(): Promise<void>
+  begin1v1Game(): Promise<void>
+  waitForGameToStart(): Promise<any>
+  scrapeCurrentState(): Promise<VisibleGameInformation>
+  waitForTick(lastOrder: Order | undefined, lastVisibleState: VisibleGameInformation | undefined): Promise<void>
+}
+
+const createConnection = (): Connection => {
+  const browser = webdriverio.remote(webdriverOpts).init().url(generalsIoUrl)
+  const loading = Promise.resolve(browser.execute(scrapeCurrentStateScript) as any)
+
+  return { loading, submitOrder, beginTutorial, begin1v1Game, scrapeCurrentState, waitForGameToStart, waitForTick }
+
+  async function click(selector: string): Promise<void> {
+    await browser.click(selector)
+  }
+
+  async function clickTile(tile: Tile, doubleClick?: boolean): Promise<void> {
+    const selector = selectorOfTile(tile)
+    await click(selector)
+    if (doubleClick) await click(selector)
+  }
+
+  async function submitOrder(order: Order | undefined): Promise<void> {
+    if (!order) return
+    const { from, to, splitArmy } = order
+    await clickTile(from, splitArmy)
+    await clickTile(to)
+  }
+
+  async function beginTutorial(): Promise<void> {
+    await click('button.big')
+    await browser.waitForVisible('td.selectable.general', 1000)
+  }
+
+  async function begin1v1Game(): Promise<void> {
+    await click('button.big')
+    await browser.waitForVisible('#game-modes', 1000)
+    await click('#game-modes > center > button.inverted:first-of-type ~ button')
+    await waitForGameToStart()
+  }
+
+  async function waitForGameToStart(): Promise<boolean> {
+    const gameStarted = await browser.isVisible('#turn-counter')
+    return gameStarted || waitForGameToStart()
+  }
+
+  async function scrapeCurrentState(): Promise<VisibleGameInformation> {
+    const result = await browser.execute(function(): any { return (window as any).scrapeCurrentState() })
+    return result.value as VisibleGameInformation
+  }
+
+  async function turnHasIncremented(lastTurn: number): Promise<boolean> {
+    const turnCounterText = await browser.getText('#turn-counter') as string
+    const match = turnCounterText.match(/\d+/)
+    if (!match) throw new Error('Could locate turn counter')
+    return parseInt(match[0], 10) > lastTurn
+  }
+
+  async function waitForTick(lastOrder: Order | undefined, lastVisibleState: VisibleGameInformation | undefined): Promise<void> {
+    if (!lastOrder) {
+      const lastTurn = lastVisibleState!.turn
+      await browser.waitUntil(async () => turnHasIncremented(lastTurn), 20000)
+    } else {
+      const orderSelector = orderSelectorOfTile(lastOrder.from)
+      const orderHasResolved = async () => !(await browser.isExisting(orderSelector))
+      await browser.waitUntil(orderHasResolved, 20000)
+    }
+  }
+}
+
+
 
 export default class BrowserGame extends EventEmitter {
-  loading: Promise<void>
-
-  private browser: Browser
+  private lastOrder: Order | undefined
   private lastVisibleState: VisibleGameInformation | undefined
+  private connection: Connection
 
   constructor() {
     super()
-    this.browser = webdriverio.remote(webdriverOpts).init().url(generalsIoUrl)
+    this.lastOrder = undefined
     this.lastVisibleState = undefined
-    this.loading = this.loadScrapeStateScript()
+    this.connection = createConnection()
   }
 
   async submitOrder(order: Order | undefined): Promise<void> {
-    if (!order) return
-    const { from, to, splitArmy } = order
-    await this.clickTile(from, splitArmy)
-    await this.clickTile(to)
-  }
-
-  async startPlayingGame(): Promise<void> {
-    await this.scrapeCurrentState()
-    this.emit('start', this.lastVisibleState)
-    await this.waitForNextTick()
+    this.lastOrder = order
+    await this.connection.submitOrder(order)
+    this.waitForTick()
   }
 
   async beginTutorial(): Promise<void> {
-    await this.click('button.big')
-    await this.browser.waitForVisible('td.selectable.general', 1000)
+    await this.connection.beginTutorial()
     await this.startPlayingGame()
   }
 
   async begin1v1Game(): Promise<void> {
-    await this.click('button.big')
-    await this.browser.waitForVisible('#game-modes', 1000)
-    await this.click('#game-modes > center > button.inverted:first-of-type ~ button')
-    await this.waitForGameToStart()
+    await this.connection.begin1v1Game()
     await this.startPlayingGame()
   }
 
-  private async waitForGameToStart(): Promise<any> {
-    const gameStarted = await this.browser.isVisible('#turn-counter')
-    if (!gameStarted) return this.waitForGameToStart()
+  private async startPlayingGame(): Promise<void> {
+    await this.scrapeCurrentState()
+    this.emit('start', this.lastVisibleState)
   }
 
-  private loadScrapeStateScript(): Promise<any> {
-    return this.browser.execute(scrapeCurrentStateScript) as any
+  private async scrapeCurrentState(): Promise<void> {
+    this.lastVisibleState = await this.connection.scrapeCurrentState()
   }
 
-  private async click(selector: string): Promise<void> {
-    await this.browser.click(selector)
+  private async waitForTick(): Promise<void> {
+    await this.connection.waitForTick(this.lastOrder, this.lastVisibleState)
+    this.afterTick()
   }
 
-  private async clickTile(tile: Tile, doubleClick?: boolean): Promise<void> {
-    const selector = `#map > tbody > tr:nth-child(${tile.rowIndex + 1}) > td:nth-child(${tile.colIndex + 1})`
-    await this.click(selector)
-    if (doubleClick) await this.click(selector)
-  }
-
-  private async scrapeCurrentState(): Promise<VisibleGameInformation> {
-    const result = await this.browser.execute(function(): any { return (window as any).scrapeCurrentState() })
-    this.lastVisibleState = result.value as VisibleGameInformation
-    return this.lastVisibleState
-  }
-
-  private async waitForTurnToIncrement(): Promise<void> {
-    const lastTurn = this.lastVisibleState!.turn
-    await this.browser.waitUntil(() =>
-      (this.browser.getText('#turn-counter') as any).then((turnCounterText: string) => {
-        const match = turnCounterText.match(/\d+/)
-        if (!match) throw new Error('Could locate turn counter')
-        return parseInt(match[0], 10) > lastTurn
-      })
-    , 20000)
-  }
-
-  // center-vertical
-
-  private async waitForNoArrowsToBeVisible(): Promise<void> {
-    const lastTurn = this.lastVisibleState!.turn
-    await this.browser.waitUntil(() =>
-      (this.browser.getText('#turn-counter') as any).then((turnCounterText: string) => {
-        const match = turnCounterText.match(/\d+/)
-        if (!match) throw new Error('Could locate turn counter')
-        return parseInt(match[0], 10) > lastTurn
-      })
-    , 20000)
-  }
-
-  private async waitForNextTick(): Promise<void> {
-    await this.waitForTurnToIncrement()
+  private async afterTick(): Promise<void> {
     await this.scrapeCurrentState()
     this.emit('nextTurn', this.lastVisibleState)
-
-    if (this.lastVisibleState!.game.over) {
-      this.emit('gameOver')
-    } else {
-      await this.waitForNextTick()
-    }
+    if (this.lastVisibleState!.game.over) this.emit('gameOver')
   }
 }

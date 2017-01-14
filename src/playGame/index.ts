@@ -25,7 +25,7 @@ function playGameUsing(opts: GamePlayOpts) {
   return async function playGame(cli): Promise<void> {
     const strategyKey = await opts.getStrategy(cli)
     const strategy = Strategies[strategyKey]
-    await connection.loading
+    // await connection.connection.loading
     console.log(opts.onStartMessage)
     opts.beginGame()
     await playGameOnceStarted(connection, strategy)
