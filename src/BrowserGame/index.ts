@@ -12,6 +12,8 @@ const webdriverOpts = { desiredCapabilities: { browserName: 'chrome' } }
 
 
 export default class BrowserGame extends EventEmitter {
+  loading: Promise<void>
+
   private browser: Browser
   private lastVisibleState: VisibleGameInformation | undefined
 
@@ -19,7 +21,7 @@ export default class BrowserGame extends EventEmitter {
     super()
     this.browser = webdriverio.remote(webdriverOpts).init().url(generalsIoUrl)
     this.lastVisibleState = undefined
-    this.loadScrapeStateScript().then(() => this.beginGame())
+    this.loading = this.loadScrapeStateScript()
   }
 
   async submitOrder(order: Order | undefined): Promise<void> {
@@ -27,6 +29,31 @@ export default class BrowserGame extends EventEmitter {
     const { from, to, splitArmy } = order
     await this.clickTile(from, splitArmy)
     await this.clickTile(to)
+  }
+
+  async startPlayingGame(): Promise<void> {
+    await this.scrapeCurrentState()
+    this.emit('start', this.lastVisibleState)
+    await this.waitForNextTurn()
+  }
+
+  async beginTutorial(): Promise<void> {
+    await this.click('button.big')
+    await this.browser.waitForVisible('td.selectable.general', 1000)
+    await this.startPlayingGame()
+  }
+
+  async begin1v1Game(): Promise<void> {
+    await this.click('button.big')
+    await this.browser.waitForVisible('#game-modes', 1000)
+    await this.click('#game-modes > center > button.inverted:first-of-type ~ button')
+    await this.waitForGameToStart()
+    await this.startPlayingGame()
+  }
+
+  private async waitForGameToStart(): Promise<any> {
+    const gameStarted = await this.browser.isVisible('#turn-counter')
+    if (!gameStarted) return this.waitForGameToStart()
   }
 
   private loadScrapeStateScript(): Promise<any> {
@@ -41,14 +68,6 @@ export default class BrowserGame extends EventEmitter {
     const selector = `#map > tbody > tr:nth-child(${tile.rowIndex + 1}) > td:nth-child(${tile.colIndex + 1})`
     await this.click(selector)
     if (doubleClick) await this.click(selector)
-  }
-
-  private async beginGame(): Promise<void> {
-    await this.click('button.big')
-    await this.browser.waitForVisible('td.selectable.general', 1000)
-    await this.scrapeCurrentState()
-    this.emit('start', this.lastVisibleState)
-    await this.waitForNextTurn()
   }
 
   private async scrapeCurrentState(): Promise<VisibleGameInformation> {
