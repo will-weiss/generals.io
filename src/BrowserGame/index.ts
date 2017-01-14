@@ -34,7 +34,7 @@ export default class BrowserGame extends EventEmitter {
   async startPlayingGame(): Promise<void> {
     await this.scrapeCurrentState()
     this.emit('start', this.lastVisibleState)
-    await this.waitForNextTurn()
+    await this.waitForNextTick()
   }
 
   async beginTutorial(): Promise<void> {
@@ -76,7 +76,7 @@ export default class BrowserGame extends EventEmitter {
     return this.lastVisibleState
   }
 
-  private async waitForNextTurn(): Promise<void> {
+  private async waitForNextTick(): Promise<void> {
     const lastTurn = this.lastVisibleState!.turn
 
     await this.browser.waitUntil(() =>
@@ -93,7 +93,7 @@ export default class BrowserGame extends EventEmitter {
     if (this.lastVisibleState!.game.over) {
       this.emit('gameOver')
     } else {
-      await this.waitForNextTurn()
+      await this.waitForNextTick()
     }
   }
 }
