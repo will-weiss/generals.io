@@ -76,9 +76,8 @@ export default class BrowserGame extends EventEmitter {
     return this.lastVisibleState
   }
 
-  private async waitForNextTick(): Promise<void> {
+  private async waitForTurnToIncrement(): Promise<void> {
     const lastTurn = this.lastVisibleState!.turn
-
     await this.browser.waitUntil(() =>
       (this.browser.getText('#turn-counter') as any).then((turnCounterText: string) => {
         const match = turnCounterText.match(/\d+/)
@@ -86,7 +85,23 @@ export default class BrowserGame extends EventEmitter {
         return parseInt(match[0], 10) > lastTurn
       })
     , 20000)
+  }
 
+  // center-vertical
+
+  private async waitForNoArrowsToBeVisible(): Promise<void> {
+    const lastTurn = this.lastVisibleState!.turn
+    await this.browser.waitUntil(() =>
+      (this.browser.getText('#turn-counter') as any).then((turnCounterText: string) => {
+        const match = turnCounterText.match(/\d+/)
+        if (!match) throw new Error('Could locate turn counter')
+        return parseInt(match[0], 10) > lastTurn
+      })
+    , 20000)
+  }
+
+  private async waitForNextTick(): Promise<void> {
+    await this.waitForTurnToIncrement()
     await this.scrapeCurrentState()
     this.emit('nextTurn', this.lastVisibleState)
 
