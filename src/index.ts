@@ -1,20 +1,14 @@
-import BrowserGame from './BrowserGame'
-import playGame from './playGame'
-import { getRandomOrderForLargestArmy } from './Strategy'
 import vantage = require('vantage')
+import playTutorial from './playTutorial'
 
 
 const cli = vantage()
 
+
 cli
   .command('play-tutorial')
   .description('Plays the tutorial')
-  .action(function(args, callback) {
-    const connection = new BrowserGame()
-    return playGame(connection, getRandomOrderForLargestArmy)
-      .then(() => callback())
-      .catch(callback)
-  })
+  .action(playTutorial)
 
 
 cli
