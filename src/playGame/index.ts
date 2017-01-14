@@ -50,7 +50,7 @@ export function playGameOnceStarted(connection: BrowserGame, strategy: Strategy)
     let gameState: GameState
 
     function takeTurn(): Promise<void> {
-      const order: Order | undefined = strategy(gameConfiguration, gameState)
+      const order: Order | undefined = strategy({ config: gameConfiguration, state: gameState })
       return connection.submitOrder(order).catch(reject)
     }
 
