@@ -9,7 +9,7 @@ A bot that plays this http://generals.io/
 # Usage
 In one terminal window
 ```bash
-./start-selenium.sh
+npm run selenium
 ```
 
 Then in the other
