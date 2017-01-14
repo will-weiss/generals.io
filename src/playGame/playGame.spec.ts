@@ -2,7 +2,7 @@ import { expect } from 'chai'
 import { cloneDeep } from 'lodash'
 import { stub, SinonStub } from 'sinon'
 import { EventEmitter } from 'events'
-import sampleFirstTurnVisibleGameInformation from '../sampleFirstTurnVisibleGameInformation'
+import { sampleFirstTurnVisibleGameInformation } from '../sampleVisibleGameInformation'
 import playGame from './index'
 
 

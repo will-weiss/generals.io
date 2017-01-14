@@ -1,12 +1,12 @@
 import BrowserGame from './BrowserGame'
 import playGame from './playGame'
-import { getRandomOrderForLargestArmy } from './Strategy'
+import { earlyGame } from './Strategy'
 import { VisibleGameInformation } from './types'
 
 
 function main(): Promise<VisibleGameInformation> {
   const connection = new BrowserGame()
-  return playGame(connection, getRandomOrderForLargestArmy)
+  return playGame(connection, earlyGame)
 }
 
 main().then(console.log, console.error)
