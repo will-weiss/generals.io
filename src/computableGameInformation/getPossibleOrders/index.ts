@@ -1,4 +1,4 @@
-import { Order, CompleteGameInformation } from '../types'
+import { Order, CompleteGameInformation } from '../../types'
 
 
 export default function getPossibleOrders(gameInfo: CompleteGameInformation): Order[] {

@@ -1,6 +1,6 @@
 import _ = require('lodash')
 import { sample } from 'lodash'
-import getPossibleOrders from './getPossibleOrders'
+import { getPossibleOrders } from '../computableGameInformation'
 import { Order, CompleteGameInformation } from '../types'
 
 
