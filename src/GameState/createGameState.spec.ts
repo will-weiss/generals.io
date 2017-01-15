@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import GameConfiguration from '../GameConfiguration'
 import createGameState from './index'
-import sampleFirstTurnVisibleGameInformation from '../sampleFirstTurnVisibleGameInformation'
+import { sampleFirstTurnVisibleGameInformation } from '../sampleVisibleGameInformation'
 
 
 describe('createGameState', () => {
