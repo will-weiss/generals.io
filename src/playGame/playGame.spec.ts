@@ -2,8 +2,13 @@ import { expect } from 'chai'
 import { cloneDeep } from 'lodash'
 import { stub, SinonStub } from 'sinon'
 import { EventEmitter } from 'events'
+<<<<<<< HEAD
 import sampleFirstTurnVisibleGameInformation from '../sampleFirstTurnVisibleGameInformation'
 import { playGameOnceStarted } from './index'
+=======
+import { sampleFirstTurnVisibleGameInformation } from '../sampleVisibleGameInformation'
+import playGame from './index'
+>>>>>>> 069d7a8... added the step away function in strategy
 
 
 describe('playGameOnceStarted', () => {
