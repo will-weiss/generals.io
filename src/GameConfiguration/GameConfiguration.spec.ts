@@ -8,7 +8,7 @@ describe('GameConfiguration', () => {
     turn: 0,
     game: { over: false, victorious: false },
     leaderboard: [
-      { army: 151, name: 'Anonymous', land: 1, color: 'red' },
+      { army: 151, name: 'dookiebot', land: 1, color: 'red' },
       { army: 2, name: 'generals.io Tutorial', land: 9, color: 'blue' }
     ],
     tiles: [
@@ -21,7 +21,7 @@ describe('GameConfiguration', () => {
     ],
   }
 
-  const gameConfiguration = new GameConfiguration('Anonymous', firstVisibleGameState)
+  const gameConfiguration = new GameConfiguration('dookiebot', firstVisibleGameState)
 
   it('adds the right properties', () => {
     expect(gameConfiguration.revealed.playerColors).to.deep.equal(['red', 'blue'])
@@ -64,7 +64,7 @@ describe('GameConfiguration', () => {
         turn: 0,
         game: { over: false, victorious: false },
         leaderboard: [
-          { army: 151, name: 'Anonymous', land: 1, color: 'red' },
+          { army: 151, name: 'dookiebot', land: 1, color: 'red' },
           { army: 2, name: 'generals.io Tutorial', land: 9, color: 'blue' }
         ],
         tiles: [
@@ -81,7 +81,7 @@ describe('GameConfiguration', () => {
         turn: 1,
         game: { over: false, victorious: false },
         leaderboard: [
-          { army: 151, name: 'Anonymous', land: 1, color: 'red' },
+          { army: 151, name: 'dookiebot', land: 1, color: 'red' },
           { army: 2, name: 'generals.io Tutorial', land: 9, color: 'blue' }
         ],
         tiles: [
@@ -94,7 +94,7 @@ describe('GameConfiguration', () => {
         ],
       }
 
-      const gameConfiguration = new GameConfiguration('Anonymous', firstVisibleGameState)
+      const gameConfiguration = new GameConfiguration('dookiebot', firstVisibleGameState)
 
       const tile0_0 = gameConfiguration.revealed.grid[0][0]
       const tile0_1 = gameConfiguration.revealed.grid[0][1]

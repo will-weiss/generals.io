@@ -8,7 +8,7 @@ import getPossibleOrders from './index'
 
 describe('getPossibleOrders', () => {
   it('returns an array of possble orders given the game state and game configuration', () => {
-    const gameConfiguration: GameConfiguration = new GameConfiguration('Anonymous', sampleFirstTurnVisibleGameInformation)
+    const gameConfiguration: GameConfiguration = new GameConfiguration('dookiebot', sampleFirstTurnVisibleGameInformation)
     const gameState: GameState = createGameState(gameConfiguration, sampleFirstTurnVisibleGameInformation)
     const possibleOrders: Order[] = getPossibleOrders({ config: gameConfiguration, state: gameState })
     expect(possibleOrders).to.be.an('array')

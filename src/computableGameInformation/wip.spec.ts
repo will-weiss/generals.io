@@ -8,7 +8,7 @@ import createGameState from '../GameState'
 
 describe('getNonsplittingTileOrders', () => {
   it('returns an array of possble orders given a specific tile, the game state, and game configuration', () => {
-    const gameConfiguration: GameConfiguration = new GameConfiguration('Anonymous', sampleFirstTurnVisibleGameInformation)
+    const gameConfiguration: GameConfiguration = new GameConfiguration('dookiebot', sampleFirstTurnVisibleGameInformation)
     const gameState: GameState = createGameState(gameConfiguration, sampleFirstTurnVisibleGameInformation)
     const tile = gameConfiguration.revealed.grid[0][0]
     const possibleTileOrders: Order[] = getNonsplittingTileOrders(gameConfiguration, gameState,tile)
@@ -30,7 +30,7 @@ describe('getNonsplittingTileOrders', () => {
 
 describe('stepAway', () => {
   it('returns an order for a tile given gameState, gameConfiguration, the specified tile, and an origin tile', () =>{
-    const gameConfiguration: GameConfiguration = new GameConfiguration('Anonymous', sampleFirstTurnVisibleGameInformation)
+    const gameConfiguration: GameConfiguration = new GameConfiguration('dookiebot', sampleFirstTurnVisibleGameInformation)
     const gameState: GameState = createGameState(gameConfiguration, sampleFirstTurnVisibleGameInformation)
     const originTile = gameConfiguration.revealed.grid[0][0]
     const otherTile = gameConfiguration.revealed.grid[0][1]

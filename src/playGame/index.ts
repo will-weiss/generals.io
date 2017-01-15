@@ -2,7 +2,6 @@ import BrowserGame from '../BrowserGame'
 import GameConfiguration from '../GameConfiguration'
 import createGameState from '../GameState'
 import { Order, GameState, Strategy, VisibleGameInformation } from '../types'
-import connection from '../connection'
 import * as Strategies from '../Strategy'
 import { botName } from '../config'
 
@@ -13,8 +12,8 @@ interface GamePlayOpts {
   onStartMessage: string
   onEndMessage: string
   getStrategy: (cli: any) => Promise<string>
-  beginGame: () => void
-  uponGameCompletion: () => Promise<void>
+  beginGame: (browserGame: BrowserGame) => void
+  uponGameCompletion: (browserGame: BrowserGame) => Promise<void>
 }
 
 function promptUserForStrategy(cli): Promise<string> {
@@ -25,21 +24,23 @@ function promptUserForStrategy(cli): Promise<string> {
 const playGameUsing = (opts: GamePlayOpts) => async cli => {
   const strategyKey = await opts.getStrategy(cli)
   const strategy = Strategies[strategyKey]
-  opts.beginGame()
-  await playGameOnceStarted(connection, strategy)
-  await opts.uponGameCompletion()
+  const browserGame = new BrowserGame()
+  opts.beginGame(browserGame)
+  await playGameOnceStarted(browserGame, strategy)
+  await opts.uponGameCompletion(browserGame)
   console.log(opts.onEndMessage)
 }
 
 
-export function playGameOnceStarted(connection: BrowserGame, strategy: Strategy): Promise<VisibleGameInformation> {
+export function playGameOnceStarted(browserGame: BrowserGame, strategy: Strategy): Promise<VisibleGameInformation> {
   return new Promise((resolve, reject) => {
+
     let gameConfiguration: GameConfiguration
     let gameState: GameState
 
     function takeTurn(): Promise<void> {
       const order: Order | undefined = strategy({ config: gameConfiguration, state: gameState })
-      return connection.submitOrder(order).catch(reject)
+      return browserGame.submitOrder(order, gameState.turn).catch(reject)
     }
 
     function onGameStart(visibleState: VisibleGameInformation): void {
@@ -54,10 +55,10 @@ export function playGameOnceStarted(connection: BrowserGame, strategy: Strategy)
       takeTurn()
     }
 
-    connection.once('start', onGameStart)
-    connection.on('nextTick', onNextTick)
-    connection.on('gameOver', resolve)
-    connection.on('error', error => reject(error))
+    browserGame.once('start', onGameStart)
+    browserGame.on('nextTick', onNextTick)
+    browserGame.on('gameOver', resolve)
+    browserGame.on('error', error => reject(error))
   })
 }
 
@@ -65,31 +66,31 @@ export function playGameOnceStarted(connection: BrowserGame, strategy: Strategy)
 export const playFFA = playGameUsing({
   onStartMessage: 'Starting a FFA game...',
   onEndMessage: 'Game over',
-  beginGame: () => connection.beginFFAGame(),
+  beginGame: browserGame => browserGame.beginFFAGame(),
   getStrategy: promptUserForStrategy,
-  uponGameCompletion: () => connection.exitGame()
+  uponGameCompletion: browserGame => browserGame.exitGame()
 })
 
 export const play1v1 = playGameUsing({
   onStartMessage: 'Starting a 1v1 game...',
   onEndMessage: 'Game over',
-  beginGame: () => connection.begin1v1Game(),
+  beginGame: browserGame => browserGame.begin1v1Game(),
   getStrategy: promptUserForStrategy,
-  uponGameCompletion: () => connection.exitGame()
+  uponGameCompletion: browserGame => browserGame.exitGame()
 })
 
 export const playTutorial = playGameUsing({
   onStartMessage: 'Starting the tutorial...',
   onEndMessage: 'Tutorial over',
-  beginGame: () => connection.beginTutorial(),
+  beginGame: browserGame => browserGame.beginTutorial(),
   getStrategy: promptUserForStrategy,
-  uponGameCompletion: () => connection.exitGame()
+  uponGameCompletion: browserGame => browserGame.exitGame()
 })
 
 export const beatTutorial = playGameUsing({
   onStartMessage: 'Starting the tutorial...',
   onEndMessage: 'Tutorial over',
-  beginGame: () => connection.beginTutorial(),
+  beginGame: browserGame => browserGame.beginTutorial(),
   getStrategy: () => Promise.resolve('beatTutorial'),
-  uponGameCompletion: () => connection.exitGame()
+  uponGameCompletion: browserGame => browserGame.exitGame()
 })
