@@ -3,12 +3,10 @@ import webdriverio = require('webdriverio')
 import scrapeCurrentStateScript from './scrapeCurrentStateScript'
 import validateVisibleGameState from './validateVisibleGameState'
 import { VisibleGameInformation, Order, Tile } from '../types'
+import { botName, generalsIoUrl, webdriverOpts } from '../config'
 
 
 type Browser = webdriverio.Client<void>
-
-const generalsIoUrl = 'http://generals.io'
-const webdriverOpts = { desiredCapabilities: { browserName: 'chrome' } }
 
 const buttonSelectors = {
   'ffa': '#game-modes > center > button.inverted:first-of-type',
@@ -29,13 +27,23 @@ interface Connection {
   beginTutorial(): Promise<VisibleGameInformation>
   beginFFAGame(): Promise<VisibleGameInformation>
   begin1v1Game(): Promise<VisibleGameInformation>
+  clickExitButton(): Promise<void>
 }
 
 const createConnection = (): Connection => {
   const browser = webdriverio.remote(webdriverOpts).init().url(generalsIoUrl)
-  const loading = Promise.resolve(browser.execute(scrapeCurrentStateScript) as any)
+  const loading = load()
 
-  return { loading, submitOrder, beginTutorial, begin1v1Game, beginFFAGame }
+  return { loading, submitOrder, beginTutorial, begin1v1Game, beginFFAGame, clickExitButton }
+
+  async function load(): Promise<void> {
+    await browser.execute(scrapeCurrentStateScript)
+    await enterName()
+  }
+
+  async function enterName(): Promise<void> {
+    await browser.setValue('input[placeholder="Anonymous"]', botName)
+  }
 
   async function click(selector: string): Promise<void> {
     await browser.click(selector)
@@ -45,6 +53,10 @@ const createConnection = (): Connection => {
     const selector = selectorOfTile(tile)
     await click(selector)
     if (doubleClick) await click(selector)
+  }
+
+  async function clickExitButton(): Promise<void> {
+    await click('.alert > center > button.inverted')
   }
 
   async function orderHasResolved(tile: Tile): Promise<boolean> {
@@ -141,7 +153,12 @@ export default class BrowserGame extends EventEmitter {
     await this.beginGame(() => this.connection.begin1v1Game())
   }
 
+  async exitGame(): Promise<void> {
+    await this.connection.clickExitButton()
+  }
+
   private async beginGame(beginGameViaConnection: () => Promise<VisibleGameInformation>): Promise<void> {
+    await this.connection.loading
     this.lastVisibleState = await beginGameViaConnection()
     this.emit('start', this.lastVisibleState)
   }
