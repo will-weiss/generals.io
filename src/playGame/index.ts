@@ -40,7 +40,9 @@ export function playGameOnceStarted(browserGame: BrowserGame, strategy: Strategy
 
     function takeTurn(): Promise<void> {
       const order: Order | undefined = strategy({ config: gameConfiguration, state: gameState })
-      return browserGame.submitOrder(order, gameState.turn).catch(reject)
+      return browserGame.submitOrder(order, gameState.turn).catch(err => {
+        console.error(err)
+      })
     }
 
     function onGameStart(visibleState: VisibleGameInformation): void {

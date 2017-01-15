@@ -9,8 +9,13 @@ type Browser = webdriverio.Client<void>
 
 const buttonSelectors = {
   'ffa': '#game-modes > center > button.inverted:first-of-type',
-  '1v1': '#game-modes > center > button.inverted:first-of-type ~ button'
+  '1v1': '#game-modes > center > button.inverted:first-of-type ~ button',
+  'exitReplays': '#replays > button.small.inverted.center-horizontal',
+  'loadMore': '#replays-table-container > button.small.inverted.center-horizontal',
+  'replayList': '#replaylist-button',
+  'exitGame': '.alert > center > button.inverted',
 }
+
 
 function selectorOfTile(tile: Tile): string {
   return `#map > tbody > tr:nth-child(${tile.rowIndex + 1}) > td:nth-child(${tile.colIndex + 1})`
@@ -26,14 +31,15 @@ interface BrowserConnection {
   beginTutorial(): Promise<VisibleGameInformation>
   beginFFAGame(): Promise<VisibleGameInformation>
   begin1v1Game(): Promise<VisibleGameInformation>
-  clickExitButton(): Promise<void>
+  clickExitGameButton(): Promise<void>
+  getReplays(): Promise<string[]>
 }
 
 const createBrowserConnection = (): BrowserConnection => {
   const browser = webdriverio.remote(webdriverOpts).init().url(generalsIoUrl)
   const loading = load()
 
-  return { loading, submitOrder, beginTutorial, begin1v1Game, beginFFAGame, clickExitButton }
+  return { loading, submitOrder, beginTutorial, begin1v1Game, beginFFAGame, clickExitGameButton, getReplays }
 
   async function load(): Promise<void> {
     await browser.execute(scrapeCurrentStateScript)
@@ -54,8 +60,30 @@ const createBrowserConnection = (): BrowserConnection => {
     if (doubleClick) await click(selector)
   }
 
-  async function clickExitButton(): Promise<void> {
-    await click('.alert > center > button.inverted')
+  async function clickExitGameButton(): Promise<void> {
+    await click(buttonSelectors['exitGame'])
+  }
+
+  async function clickReplayListButton(): Promise<void> {
+    await click(buttonSelectors['replayList'])
+  }
+
+  async function getReplays(): Promise<string[]> {
+    await clickReplayListButton()
+
+    while ((await browser.getText(buttonSelectors['loadMore'])) === 'Load More') {
+      await browser.click(buttonSelectors['loadMore'])
+    }
+
+    const replays = (
+      await browser.execute(() =>
+        Array.from(document.querySelectorAll('#replays-table > tbody > tr > td > a'))
+          .map((anchor: HTMLAnchorElement) => anchor.href))
+    ).value
+
+    await click(buttonSelectors['exitReplays'])
+
+    return replays
   }
 
   async function orderHasResolved(tile: Tile): Promise<boolean> {

@@ -1,6 +1,13 @@
 import vantage = require('vantage')
+import browserConnection from '../browserConnection'
+import { logReplayUrl } from '../logging'
 import { beatTutorial, play1v1, playTutorial, playFFA } from '../playGame'
 
+
+async function getReplays(): Promise<void> {
+  const replays = await browserConnection.getReplays()
+  replays.forEach(logReplayUrl)
+}
 
 const cli = vantage()
 
@@ -29,6 +36,11 @@ cli
   .command('ffa')
   .description('Plays a FFA game')
   .action(runAction(playFFA))
+
+cli
+  .command('replays')
+  .description('Gets urls of replays')
+  .action(runAction(getReplays))
 
 
 export default cli
