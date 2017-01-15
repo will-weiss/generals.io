@@ -1,5 +1,5 @@
 import vantage = require('vantage')
-import { beatTutorial, play1v1, playTutorial } from '../playGame'
+import { beatTutorial, play1v1, playTutorial, playFFA } from '../playGame'
 
 
 const cli = vantage()
@@ -25,11 +25,10 @@ cli
   .description('Plays a 1v1 game')
   .action(runAction(play1v1))
 
-
 cli
-  .delimiter('dookiebot~$')
-  .listen(8010)
-  .show()
+  .command('ffa')
+  .description('Plays a FFA game')
+  .action(runAction(playFFA))
 
 
 export default cli

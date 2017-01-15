@@ -63,6 +63,13 @@ export function playGameOnceStarted(connection: BrowserGame, strategy: Strategy)
 }
 
 
+export const playFFA = playGameUsing({
+  onStartMessage: 'Starting a FFA game...',
+  onEndMessage: 'Game over',
+  beginGame: () => connection.beginFFAGame(),
+  getStrategy: promptUserForStrategy
+})
+
 export const play1v1 = playGameUsing({
   onStartMessage: 'Starting a 1v1 game...',
   onEndMessage: 'Game over',
