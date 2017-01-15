@@ -24,7 +24,7 @@ export default class BrowserGame extends EventEmitter {
   }
 
   async exitGame(): Promise<void> {
-    await browserConnection.clickExitButton()
+    await browserConnection.clickExitGameButton()
   }
 
   private async beginGame(beginGameViaConnection: () => Promise<VisibleGameInformation>): Promise<void> {

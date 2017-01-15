@@ -7,7 +7,7 @@
     "copy": "rsync -a --exclude '*.ts' src/ lib/",
     "compile": "tsc",
     "dev": "npm run build && npm start",
-    "selenium": "java -jar -Dwebdriver.geckodriver.driver=./geckodriver selenium-server-standalone-3.0.1.jar",
+    "selenium": "java -jar selenium-server-standalone-3.0.1.jar",
     "start": "node lib/index.js",
     "test": "npm run build && mocha 'lib/**/*.spec.js'"
   },
