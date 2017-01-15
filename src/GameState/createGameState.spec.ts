@@ -6,7 +6,7 @@ import { sampleFirstTurnVisibleGameInformation } from '../sampleVisibleGameInfor
 
 describe('createGameState', () => {
   it("computes the current game state given the game's configuration, the currently visible state, and the previous game state", () => {
-    const config = new GameConfiguration('Anonymous', sampleFirstTurnVisibleGameInformation)
+    const config = new GameConfiguration('dookiebot', sampleFirstTurnVisibleGameInformation)
 
     const gameState = createGameState(config, sampleFirstTurnVisibleGameInformation)
 

@@ -10,7 +10,7 @@ describe('validateVisibleGameState', () => {
     game: { over: false, victorious: false },
     turn: 55,
     leaderboard: [
-      { name: 'Anonymous', color: 'red', army: 216, land: 6 },
+      { name: 'dookiebot', color: 'red', army: 216, land: 6 },
       { name: 'generals.io Tutorial', color: 'blue', army: 74, land: 9 },
     ],
     tiles: [

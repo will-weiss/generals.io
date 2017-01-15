@@ -8,7 +8,7 @@ import getNonsplittingTileOrders from './index'
 
 describe('getNonsplittingTileOrders', () => {
   it('returns an array of possble orders given a specific tile, the game state, and game configuration', () => {
-    const gameConfiguration: GameConfiguration = new GameConfiguration('Anonymous', sampleFirstTurnVisibleGameInformation)
+    const gameConfiguration: GameConfiguration = new GameConfiguration('dookiebot', sampleFirstTurnVisibleGameInformation)
     const gameState: GameState = createGameState(gameConfiguration, sampleFirstTurnVisibleGameInformation)
     const gameInfo = { config: gameConfiguration, state: gameState }
     const tile = gameConfiguration.revealed.grid[0][0]

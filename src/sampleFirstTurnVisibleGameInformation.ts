@@ -6,7 +6,7 @@ const sampleFirstTurnVisibleGameInformation: VisibleGameInformation = {
   turn: 0,
   game: { over: false, victorious: false },
   leaderboard: [
-    { army: 151, name: 'Anonymous', land: 1, color: 'red' },
+    { army: 151, name: 'dookiebot', land: 1, color: 'red' },
     { army: 2, name: 'generals.io Tutorial', land: 9, color: 'blue' }
   ],
   tiles: [
@@ -25,7 +25,7 @@ export const initialTutorialVisibleGameInformation: VisibleGameInformation = dee
   game: { over: false, victorious: false },
   turn: 1,
   leaderboard: [
-    { name: 'Anonymous', color: 'red', army: 216, land: 6 },
+    { name: 'dookiebot', color: 'red', army: 216, land: 6 },
     { name: 'generals.io Tutorial', color: 'blue', army: 74, land: 9 },
   ],
   tiles: [

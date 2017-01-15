@@ -40,7 +40,7 @@ describe('playGameOnceStarted', () => {
 
     expect(result).to.equal(gameOverGameState)
     expect(connection.submitOrder.callCount).to.equal(2)
-    expect(connection.submitOrder.firstCall.args).to.deep.equal(['order after game start'])
-    expect(connection.submitOrder.secondCall.args).to.deep.equal(['order after next turn'])
+    expect(connection.submitOrder.firstCall.args).to.deep.equal(['order after game start', 0])
+    expect(connection.submitOrder.secondCall.args).to.deep.equal(['order after next turn', 1])
   })
 })

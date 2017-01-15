@@ -9,7 +9,7 @@ import createGameState from '../GameState'
 
 describe('beatTutorial', () => {
 
-  const config: GameConfiguration = new GameConfiguration('Anonymous', initialTutorialVisibleGameInformation)
+  const config: GameConfiguration = new GameConfiguration('dookiebot', initialTutorialVisibleGameInformation)
   const initialState: GameState = createGameState(config, initialTutorialVisibleGameInformation)
 
   // it('gives the correct series of orders given the turn', () => {

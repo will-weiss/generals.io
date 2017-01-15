@@ -17,7 +17,7 @@ function createHiddenGameConfiguration(revealed: RevealedGameConfiguration, firs
   const unknownObstacles: Set<Tile> = new Set()
   const adjacencies: Map<Tile, Set<Tile>> = new Map()
   const distances: Map<Tile, Map<Tile, number>> = new Map()
-  
+
   function isKnownMountain(tile:Tile): boolean {
     return knownMountainTiles.some(knownMountainTile =>
       tile.rowIndex === knownMountainTile.rowIndex && tile.colIndex === knownMountainTile.colIndex)
@@ -107,6 +107,10 @@ export default class GameConfiguration implements GameConfiguration {
   }
 
   update(visibleGameState: VisibleGameInformation): this {
+    expect(this).to.have.deep.property('revealed.grid').that.is.an('array')
+    expect(this).to.have.deep.property('revealed.tiles').that.is.instanceof(Set)
+    expect(this).to.have.deep.property('revealed.grid').that.has.length(this.revealed.height)
+
     const { grid, tiles } = this.revealed
     const { passable, unknownObstacles, adjacencies, distances, cities, crowns } = this.hidden
 
@@ -159,6 +163,7 @@ export default class GameConfiguration implements GameConfiguration {
 
     visibleGameState.tiles.forEach(visibleTile => {
       if (!visibleTile.isCity) return
+      expect(grid).to.have.deep.property(`${visibleTile.rowIndex}.${visibleTile.colIndex}`)
       const tile = grid[visibleTile.rowIndex][visibleTile.colIndex]
       cities.add(tile)
       if (visibleTile.isGeneral) crowns.set(visibleTile.color as LivePlayerColor, tile)
@@ -166,6 +171,7 @@ export default class GameConfiguration implements GameConfiguration {
 
     visibleGameState.tiles.forEach(visibleTile => {
       if (visibleTile.isUnknownObstacle) return
+      expect(grid).to.have.deep.property(`${visibleTile.rowIndex}.${visibleTile.colIndex}`)
       const tile = grid[visibleTile.rowIndex][visibleTile.colIndex]
       const wasAlreadySeen = !unknownObstacles.has(tile)
       if (wasAlreadySeen) return
