@@ -3,12 +3,15 @@ import webdriverio = require('webdriverio')
 import scrapeCurrentStateScript from './scrapeCurrentStateScript'
 import validateVisibleGameState from './validateVisibleGameState'
 import { VisibleGameInformation, Order, Tile } from '../types'
+import { botName, generalsIoUrl, webdriverOpts } from '../config'
 
 
 type Browser = webdriverio.Client<void>
 
-const generalsIoUrl = 'http://generals.io'
-const webdriverOpts = { desiredCapabilities: { browserName: 'chrome' } }
+const buttonSelectors = {
+  'ffa': '#game-modes > center > button.inverted:first-of-type',
+  '1v1': '#game-modes > center > button.inverted:first-of-type ~ button'
+}
 
 function selectorOfTile(tile: Tile): string {
   return `#map > tbody > tr:nth-child(${tile.rowIndex + 1}) > td:nth-child(${tile.colIndex + 1})`
@@ -22,14 +25,25 @@ interface Connection {
   loading: Promise<void>
   submitOrder(order: Order | undefined, lastTurn: number): Promise<VisibleGameInformation>
   beginTutorial(): Promise<VisibleGameInformation>
+  beginFFAGame(): Promise<VisibleGameInformation>
   begin1v1Game(): Promise<VisibleGameInformation>
+  clickExitButton(): Promise<void>
 }
 
 const createConnection = (): Connection => {
   const browser = webdriverio.remote(webdriverOpts).init().url(generalsIoUrl)
-  const loading = Promise.resolve(browser.execute(scrapeCurrentStateScript) as any)
+  const loading = load()
 
-  return { loading, submitOrder, beginTutorial, begin1v1Game }
+  return { loading, submitOrder, beginTutorial, begin1v1Game, beginFFAGame, clickExitButton }
+
+  async function load(): Promise<void> {
+    await browser.execute(scrapeCurrentStateScript)
+    await enterName()
+  }
+
+  async function enterName(): Promise<void> {
+    await browser.setValue('input[placeholder="Anonymous"]', botName)
+  }
 
   async function click(selector: string): Promise<void> {
     await browser.click(selector)
@@ -39,6 +53,10 @@ const createConnection = (): Connection => {
     const selector = selectorOfTile(tile)
     await click(selector)
     if (doubleClick) await click(selector)
+  }
+
+  async function clickExitButton(): Promise<void> {
+    await click('.alert > center > button.inverted')
   }
 
   async function orderHasResolved(tile: Tile): Promise<boolean> {
@@ -68,12 +86,20 @@ const createConnection = (): Connection => {
     return scrapeCurrentState()
   }
 
-  async function begin1v1Game(): Promise<VisibleGameInformation> {
+  async function beginRegularGame(selector: string): Promise<VisibleGameInformation> {
     await click('button.big')
     await browser.waitForVisible('#game-modes', 1000)
-    await click('#game-modes > center > button.inverted:first-of-type ~ button')
+    await click(selector)
     await waitForGameToStart()
     return scrapeCurrentState()
+  }
+
+  async function beginFFAGame(): Promise<VisibleGameInformation> {
+    return beginRegularGame(buttonSelectors['ffa'])
+  }
+
+  async function begin1v1Game(): Promise<VisibleGameInformation> {
+    return beginRegularGame(buttonSelectors['1v1'])
   }
 
   async function waitForGameToStart(): Promise<boolean> {
@@ -119,11 +145,20 @@ export default class BrowserGame extends EventEmitter {
     await this.beginGame(() => this.connection.beginTutorial())
   }
 
+  async beginFFAGame(): Promise<void> {
+    await this.beginGame(() => this.connection.beginFFAGame())
+  }
+
   async begin1v1Game(): Promise<void> {
     await this.beginGame(() => this.connection.begin1v1Game())
   }
 
+  async exitGame(): Promise<void> {
+    await this.connection.clickExitButton()
+  }
+
   private async beginGame(beginGameViaConnection: () => Promise<VisibleGameInformation>): Promise<void> {
+    await this.connection.loading
     this.lastVisibleState = await beginGameViaConnection()
     this.emit('start', this.lastVisibleState)
   }
