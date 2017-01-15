@@ -15,24 +15,21 @@ function selectorOfTile(tile: Tile): string {
 }
 
 function orderSelectorOfTile(tile: Tile): string {
-  return `${selectorOfTile(tile)} > div.center-vertical`
+  return `${selectorOfTile(tile)} > div[class*="center-"]`
 }
 
 interface Connection {
   loading: Promise<void>
-  submitOrder(order: Order | undefined): Promise<void>
-  beginTutorial(): Promise<void>
-  begin1v1Game(): Promise<void>
-  waitForGameToStart(): Promise<any>
-  scrapeCurrentState(): Promise<VisibleGameInformation>
-  waitForTick(lastOrder: Order | undefined, lastVisibleState: VisibleGameInformation | undefined): Promise<void>
+  submitOrder(order: Order | undefined, lastTurn: number): Promise<VisibleGameInformation>
+  beginTutorial(): Promise<VisibleGameInformation>
+  begin1v1Game(): Promise<VisibleGameInformation>
 }
 
 const createConnection = (): Connection => {
   const browser = webdriverio.remote(webdriverOpts).init().url(generalsIoUrl)
   const loading = Promise.resolve(browser.execute(scrapeCurrentStateScript) as any)
 
-  return { loading, submitOrder, beginTutorial, begin1v1Game, scrapeCurrentState, waitForGameToStart, waitForTick }
+  return { loading, submitOrder, beginTutorial, begin1v1Game }
 
   async function click(selector: string): Promise<void> {
     await browser.click(selector)
@@ -44,23 +41,39 @@ const createConnection = (): Connection => {
     if (doubleClick) await click(selector)
   }
 
-  async function submitOrder(order: Order | undefined): Promise<void> {
-    if (!order) return
+  async function orderHasResolved(tile: Tile): Promise<boolean> {
+    return !(await browser.isExisting(orderSelectorOfTile(tile)))
+  }
+
+  async function waitUntil(predicate: () => Promise<boolean>): Promise<void> {
+    await browser.waitUntil(predicate, 20000)
+  }
+
+  async function issueOrder(order: Order): Promise<void> {
     const { from, to, splitArmy } = order
     await clickTile(from, splitArmy)
     await clickTile(to)
+    await waitUntil(() => orderHasResolved(from))
   }
 
-  async function beginTutorial(): Promise<void> {
+  async function submitOrder(order: Order | undefined, lastTurn: number): Promise<VisibleGameInformation> {
+    const completed = order ? issueOrder(order) : waitUntil(() => turnHasIncremented(lastTurn))
+    await completed
+    return scrapeCurrentState()
+  }
+
+  async function beginTutorial(): Promise<VisibleGameInformation> {
     await click('button.big')
     await browser.waitForVisible('td.selectable.general', 1000)
+    return scrapeCurrentState()
   }
 
-  async function begin1v1Game(): Promise<void> {
+  async function begin1v1Game(): Promise<VisibleGameInformation> {
     await click('button.big')
     await browser.waitForVisible('#game-modes', 1000)
     await click('#game-modes > center > button.inverted:first-of-type ~ button')
     await waitForGameToStart()
+    return scrapeCurrentState()
   }
 
   async function waitForGameToStart(): Promise<boolean> {
@@ -73,24 +86,13 @@ const createConnection = (): Connection => {
     return result.value as VisibleGameInformation
   }
 
-  async function orderHasResolved(lastOrder: Order): Promise<boolean> {
-    const orderSelector = orderSelectorOfTile(lastOrder.from)
-    return !(await browser.isExisting(orderSelector))
-  }
-
   async function turnHasIncremented(lastTurn: number): Promise<boolean> {
     const turnCounterText = await browser.getText('#turn-counter') as string
     const match = turnCounterText.match(/\d+/)
     if (!match) throw new Error('Could locate turn counter')
     return parseInt(match[0], 10) > lastTurn
   }
-
-  async function waitForTick(lastOrder: Order | undefined, lastVisibleState: VisibleGameInformation | undefined): Promise<void> {
-    const waitUntil = lastOrder ? () => orderHasResolved(lastOrder) : () => turnHasIncremented(lastVisibleState!.turn)
-    await browser.waitUntil(waitUntil, 20000)
-  }
 }
-
 
 
 export default class BrowserGame extends EventEmitter {
@@ -107,37 +109,26 @@ export default class BrowserGame extends EventEmitter {
 
   async submitOrder(order: Order | undefined): Promise<void> {
     this.lastOrder = order
-    await this.connection.submitOrder(order)
-    this.waitForTick()
+    this.lastVisibleState = await this.connection.submitOrder(order, this.turn)
+    this.lastVisibleState.game.over
+      ? this.emit('gameOver')
+      : this.emit('nextTick', this.lastVisibleState)
   }
 
   async beginTutorial(): Promise<void> {
-    await this.connection.beginTutorial()
-    await this.startPlayingGame()
+    await this.beginGame(() => this.connection.beginTutorial())
   }
 
   async begin1v1Game(): Promise<void> {
-    await this.connection.begin1v1Game()
-    await this.startPlayingGame()
+    await this.beginGame(() => this.connection.begin1v1Game())
   }
 
-  private async startPlayingGame(): Promise<void> {
-    await this.scrapeCurrentState()
+  private async beginGame(beginGameViaConnection: () => Promise<VisibleGameInformation>): Promise<void> {
+    this.lastVisibleState = await beginGameViaConnection()
     this.emit('start', this.lastVisibleState)
   }
 
-  private async scrapeCurrentState(): Promise<void> {
-    this.lastVisibleState = await this.connection.scrapeCurrentState()
-  }
-
-  private async waitForTick(): Promise<void> {
-    await this.connection.waitForTick(this.lastOrder, this.lastVisibleState)
-    this.afterTick()
-  }
-
-  private async afterTick(): Promise<void> {
-    await this.scrapeCurrentState()
-    this.emit('nextTick', this.lastVisibleState)
-    if (this.lastVisibleState!.game.over) this.emit('gameOver')
+  private get turn(): number {
+    return this.lastVisibleState ? this.lastVisibleState.turn : -1
   }
 }
