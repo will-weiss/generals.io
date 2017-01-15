@@ -15,10 +15,10 @@ describe('playGameOnceStarted', () => {
     strategy.onFirstCall().returns('order after game start')
     strategy.onSecondCall().returns('order after next turn')
 
-    const nextTurnGameState = cloneDeep(sampleFirstTurnVisibleGameInformation)
-    nextTurnGameState.turn = 1
+    const nextTickGameState = cloneDeep(sampleFirstTurnVisibleGameInformation)
+    nextTickGameState.turn = 1
 
-    const gameOverGameState = cloneDeep(nextTurnGameState)
+    const gameOverGameState = cloneDeep(nextTickGameState)
     gameOverGameState.turn = 2
     gameOverGameState.game.over = true
     gameOverGameState.game.victorious = true
@@ -33,7 +33,7 @@ describe('playGameOnceStarted', () => {
     const inProgressGame = playGameOnceStarted(connection as any, strategy)
 
     await tickThenEmit('start', sampleFirstTurnVisibleGameInformation)
-    await tickThenEmit('nextTurn', nextTurnGameState)
+    await tickThenEmit('nextTick', nextTickGameState)
     await tickThenEmit('gameOver', gameOverGameState)
 
     const result = await inProgressGame
