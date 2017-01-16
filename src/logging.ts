@@ -1,5 +1,5 @@
 import { appendFileSync } from 'fs'
 
 export function logReplayUrl(url: string): void {
-  appendFileSync(__dirname + '/../replays', url, 'utf8')
+  appendFileSync(__dirname + '/../replays', url + '\n', 'utf8')
 }

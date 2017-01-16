@@ -1,10 +1,6 @@
 import cli from './cli'
-import { botName, botPort } from './config'
+import { botName } from './config'
 
-cli
-  .delimiter(`${botName}~$`)
-  .listen(botPort)
-  .show()
-
+cli.delimiter(`${botName}~$`).show()
 
 process.on('unhandledRejection', err => console.error(err))

@@ -38,11 +38,13 @@ export function playGameOnceStarted(browserGame: BrowserGame, strategy: Strategy
     let gameConfiguration: GameConfiguration
     let gameState: GameState
 
-    function takeTurn(): Promise<void> {
+    async function takeTurn(): Promise<void> {
       const order: Order | undefined = strategy({ config: gameConfiguration, state: gameState })
-      return browserGame.submitOrder(order, gameState.turn).catch(err => {
+      try {
+        await browserGame.submitOrder(order, gameState.turn)
+      } catch (err) {
         console.error(err)
-      })
+      }
     }
 
     function onGameStart(visibleState: VisibleGameInformation): void {
@@ -70,6 +72,14 @@ export const playFFA = playGameUsing({
   onEndMessage: 'Game over',
   beginGame: browserGame => browserGame.beginFFAGame(),
   getStrategy: promptUserForStrategy,
+  uponGameCompletion: browserGame => browserGame.exitGame()
+})
+
+export const playFFARandomly = playGameUsing({
+  onStartMessage: 'Starting a FFA game...',
+  onEndMessage: 'Game over',
+  beginGame: browserGame => browserGame.beginFFAGame(),
+  getStrategy: () => Promise.resolve('getRandomOrder'),
   uponGameCompletion: browserGame => browserGame.exitGame()
 })
 
