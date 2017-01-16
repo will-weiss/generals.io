@@ -1,7 +1,6 @@
-import { delay } from 'bluebird'
+import { delay, race } from 'bluebird'
 import webdriverio = require('webdriverio')
 import scrapeCurrentStateScript from './scrapeCurrentStateScript'
-import validateVisibleGameState from './validateVisibleGameState'
 import { VisibleGameInformation, Order, Tile } from '../types'
 import { botName, generalsIoUrl, webdriverOpts, viewportSize } from '../config'
 import * as selectors from './selectors'
@@ -10,25 +9,32 @@ import * as selectors from './selectors'
 type Browser = webdriverio.Client<void>
 
 
-interface BrowserConnection {
-  loading: Promise<void>
+export interface BrowserConnection {
   submitOrder(order: Order | undefined, lastTurn: number): Promise<VisibleGameInformation>
   beginTutorial(): Promise<VisibleGameInformation>
   beginFFAGame(): Promise<VisibleGameInformation>
   begin1v1Game(): Promise<VisibleGameInformation>
-  clickExitGameButton(): Promise<void>
-  getReplays(): Promise<string[]>
-  waitForMainPage(): Promise<void>
+  exitGameAndWaitForMainPage(): Promise<void>
+  waitForGameToEndExitAndGetReplay(): Promise<string>
+  close(): Promise<void>
 }
 
-const createBrowserConnection = (): BrowserConnection => {
+export async function createBrowserConnection(): Promise<BrowserConnection> {
   const browser = webdriverio.remote(webdriverOpts).init().url(generalsIoUrl)
-  const loading = load()
+  await load()
 
-  return { loading, submitOrder, beginTutorial, begin1v1Game, beginFFAGame, clickExitGameButton, getReplays, waitForMainPage }
+  return {
+    submitOrder,
+    beginTutorial,
+    begin1v1Game,
+    beginFFAGame,
+    exitGameAndWaitForMainPage,
+    waitForGameToEndExitAndGetReplay,
+    close,
+  }
 
   async function load(): Promise<void> {
-    await browser.setViewportSize(viewportSize, false)
+    // await browser.setViewportSize(viewportSize, false)
     await browser.execute(scrapeCurrentStateScript)
     await enterName()
   }
@@ -55,33 +61,36 @@ const createBrowserConnection = (): BrowserConnection => {
     await click(selectors.replayList)
   }
 
-  function scrapeReplays(): string[] {
-    return Array.from(document.querySelectorAll(selectors.replayLink))
-      .map((anchor: HTMLAnchorElement) => anchor.href)
-  }
-
-  async function getReplays(): Promise<string[]> {
+  async function attemptToGetReplay(): Promise<string | undefined> {
     await clickReplayListButton()
     await browser.waitForVisible(selectors.replays)
-
-    while (await browser.isVisible(selectors.loadMore)) {
-      await click(selectors.loadMore)
-      delay(200)
-    }
-
-    const replays = (await browser.execute(scrapeReplays)).value
-
+    const linkPresent = await browser.isVisible(selectors.replayLink)
+    if (!linkPresent) return undefined
+    const replay = await browser.getAttribute(selectors.replayLink, 'href')
     await click(selectors.exitReplays)
+    return replay
+  }
 
-    return replays
+  async function refresh(): Promise<void> {
+    const refreshed = await race([browser.refresh().then(() => true), delay(10 * 1000).then(() => false)])
+    if (refreshed) return
+    return refresh()
+  }
+
+  async function getReplay(): Promise<string> {
+    const replay = await attemptToGetReplay()
+    if (replay) return replay
+    await delay(30 * 1000)
+    await refresh()
+    return getReplay()
   }
 
   async function orderHasResolved(tile: Tile): Promise<boolean> {
     return !(await browser.isExisting(selectors.ofOrderArrow(tile)))
   }
 
-  async function waitUntil(predicate: () => Promise<boolean>): Promise<void> {
-    await browser.waitUntil(predicate, 20000)
+  async function waitUntil(predicate: () => Promise<boolean>, milliseconds: number = 20000): Promise<void> {
+    await browser.waitUntil(predicate, milliseconds)
   }
 
   async function issueOrder(order: Order): Promise<void> {
@@ -142,8 +151,23 @@ const createBrowserConnection = (): BrowserConnection => {
   async function waitForMainPage(): Promise<void> {
     await browser.waitForVisible(selectors.mainMenu, 5000)
   }
+
+  async function exitGameAndWaitForMainPage(): Promise<void> {
+    await clickExitGameButton()
+    await waitForMainPage()
+  }
+
+  async function waitForGameToEndExitAndGetReplay(): Promise<string> {
+    await browser.waitForVisible(selectors.watchReplay, 60 * 60 * 1000)
+    await exitGameAndWaitForMainPage()
+    return getReplay()
+  }
+
+  async function close(): Promise<void> {
+    try {
+      await browser.close()
+    } catch (err) {
+      console.error(err)
+    }
+  }
 }
-
-const browserConnection = createBrowserConnection()
-
-export default browserConnection
