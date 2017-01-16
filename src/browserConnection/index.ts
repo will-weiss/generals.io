@@ -73,6 +73,11 @@ const createBrowserConnection = (): BrowserConnection => {
     await click(buttonSelectors['replayList'])
   }
 
+  function scrapeReplays(): string[] {
+    return Array.from(document.querySelectorAll('#replays-table > tbody > tr > td > a'))
+      .map((anchor: HTMLAnchorElement) => anchor.href)
+  }
+
   async function getReplays(): Promise<string[]> {
     await clickReplayListButton()
     await browser.waitForVisible('#replays')
@@ -82,11 +87,7 @@ const createBrowserConnection = (): BrowserConnection => {
       delay(200)
     }
 
-    const replays = (
-      await browser.execute(() =>
-        Array.from(document.querySelectorAll('#replays-table > tbody > tr > td > a'))
-          .map((anchor: HTMLAnchorElement) => anchor.href))
-    ).value
+    const replays = (await browser.execute(scrapeReplays)).value
 
     await click(buttonSelectors['exitReplays'])
 

@@ -97,4 +97,4 @@ export interface Order {
 
 export type Strategy = (gameInfo: CompleteGameInformation) => Order | undefined
 
-export type Evaluator = (gameInfo: CompleteGameInformation, order: Order) => number
+export type Evaluator = (gameInfo: CompleteGameInformation, order: Order | undefined) => number

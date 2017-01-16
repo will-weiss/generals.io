@@ -1,13 +1,7 @@
 import vantage = require('vantage')
-import browserConnection from '../browserConnection'
-import { logReplayUrl } from '../logging'
+import { logReplays } from '../logging'
 import { beatTutorial, play1v1, playTutorial, playFFA, playFFARandomly } from '../playGame'
 
-
-async function getReplays(): Promise<void> {
-  const replays = await browserConnection.getReplays()
-  replays.forEach(logReplayUrl)
-}
 
 const cli = vantage()
 
@@ -18,18 +12,10 @@ function runAction(action) {
 }
 
 async function loopFFA(cli): Promise<void> {
-
-  try {
-    await beatTutorial(cli)
-    await browserConnection.waitForMainPage()
-  } catch (err) {
-    console.error(err)
-  }
-
   while (true) {
     try {
       await playFFARandomly(cli)
-      await browserConnection.waitForMainPage()
+      await logReplays()
     } catch (err) {
       console.error(err)
     }
@@ -58,8 +44,8 @@ cli
 
 cli
   .command('replays')
-  .description('Gets urls of replays')
-  .action(runAction(getReplays))
+  .description('Logs urls of replays')
+  .action(runAction(logReplays))
 
 cli
   .command('loop')

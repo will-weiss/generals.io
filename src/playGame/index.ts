@@ -5,25 +5,25 @@ import { Order, Strategy, VisibleGameInformation } from '../types'
 import * as Strategies from '../Strategy'
 import { botName } from '../config'
 
+type StrategyKey = keyof typeof Strategies
 
-const strategies = Object.keys(Strategies)
+const strategies: StrategyKey[] = Object.keys(Strategies) as any
 
 interface GamePlayOpts {
   onStartMessage: string
   onEndMessage: string
-  getStrategy: (cli: any) => Promise<string>
+  getStrategy: (cli: any) => Promise<Strategy>
   beginGame: () => Promise<VisibleGameInformation>
   uponGameCompletion: () => Promise<void>
 }
 
-function promptUserForStrategy(cli): Promise<string> {
-  const prompt = [{ type: 'list', name: 'strategy', message: 'Choose a strategy: ', choices: strategies }]
-  return new Promise(resolve => cli.prompt(prompt, ({ strategy }) => resolve(strategy)))
+function promptUserForStrategy(cli): Promise<Strategy> {
+  const prompt = [{ type: 'list', name: 'strategyKey', message: 'Choose a strategy: ', choices: strategies }]
+  return new Promise(resolve => cli.prompt(prompt, ({ strategyKey }) => resolve(Strategies[strategyKey])))
 }
 
 const playGameUsing = (opts: GamePlayOpts) => async cli => {
-  const strategyKey = await opts.getStrategy(cli)
-  const strategy = Strategies[strategyKey]
+  const strategy = await opts.getStrategy(cli)
   const firstVisibleGameInformation = await opts.beginGame()
   await playGameOnceStarted(firstVisibleGameInformation, strategy)
   await opts.uponGameCompletion()
@@ -49,21 +49,25 @@ export async function playGameOnceStarted(firstVisibleGameInformation: VisibleGa
   }
 }
 
+async function exitGameAndWaitForMainPage(): Promise<void> {
+  await browserConnection.clickExitGameButton()
+  await browserConnection.waitForMainPage()
+}
 
 export const playFFA = playGameUsing({
   onStartMessage: 'Starting a FFA game...',
   onEndMessage: 'Game over',
   beginGame: () => browserConnection.beginFFAGame(),
   getStrategy: promptUserForStrategy,
-  uponGameCompletion: () => browserConnection.clickExitGameButton()
+  uponGameCompletion: exitGameAndWaitForMainPage
 })
 
 export const playFFARandomly = playGameUsing({
   onStartMessage: 'Starting a FFA game...',
   onEndMessage: 'Game over',
   beginGame: () => browserConnection.beginFFAGame(),
-  getStrategy: () => Promise.resolve('getRandomOrder'),
-  uponGameCompletion: () => browserConnection.clickExitGameButton()
+  getStrategy: () => Promise.resolve(Strategies.random),
+  uponGameCompletion: exitGameAndWaitForMainPage
 })
 
 export const play1v1 = playGameUsing({
@@ -71,7 +75,7 @@ export const play1v1 = playGameUsing({
   onEndMessage: 'Game over',
   beginGame: () => browserConnection.begin1v1Game(),
   getStrategy: promptUserForStrategy,
-  uponGameCompletion: () => browserConnection.clickExitGameButton()
+  uponGameCompletion: exitGameAndWaitForMainPage
 })
 
 export const playTutorial = playGameUsing({
@@ -79,13 +83,13 @@ export const playTutorial = playGameUsing({
   onEndMessage: 'Tutorial over',
   beginGame: () => browserConnection.beginTutorial(),
   getStrategy: promptUserForStrategy,
-  uponGameCompletion: () => browserConnection.clickExitGameButton()
+  uponGameCompletion: exitGameAndWaitForMainPage
 })
 
 export const beatTutorial = playGameUsing({
   onStartMessage: 'Starting the tutorial...',
   onEndMessage: 'Tutorial over',
   beginGame: () => browserConnection.beginTutorial(),
-  getStrategy: () => Promise.resolve('beatTutorial'),
-  uponGameCompletion: () => browserConnection.clickExitGameButton()
+  getStrategy: () => Promise.resolve(Strategies.beatTutorial),
+  uponGameCompletion: exitGameAndWaitForMainPage
 })
