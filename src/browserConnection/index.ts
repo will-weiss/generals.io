@@ -4,29 +4,11 @@ import scrapeCurrentStateScript from './scrapeCurrentStateScript'
 import validateVisibleGameState from './validateVisibleGameState'
 import { VisibleGameInformation, Order, Tile } from '../types'
 import { botName, generalsIoUrl, webdriverOpts, viewportSize } from '../config'
+import * as selectors from './selectors'
 
 
 type Browser = webdriverio.Client<void>
 
-const buttonSelectors = {
-  'ffa': '#game-modes > center > button.inverted:first-of-type',
-  '1v1': '#game-modes > center > button.inverted:first-of-type ~ button',
-  'loadMore': '#replays-table-container > button',
-  'exitReplays': '#replays > button.small.inverted.center-horizontal',
-  'replayList': '#replaylist-button',
-  'watchReplay': '.alert > center > button.small.inverted',
-  'exitGame': '.alert > center > button.inverted:last-of-type',
-  'playGame': 'button.big',
-}
-
-
-function selectorOfTile(tile: Tile): string {
-  return `#map > tbody > tr:nth-child(${tile.rowIndex + 1}) > td:nth-child(${tile.colIndex + 1})`
-}
-
-function orderSelectorOfTile(tile: Tile): string {
-  return `${selectorOfTile(tile)} > div[class*="center-"]`
-}
 
 interface BrowserConnection {
   loading: Promise<void>
@@ -52,7 +34,7 @@ const createBrowserConnection = (): BrowserConnection => {
   }
 
   async function enterName(): Promise<void> {
-    await browser.setValue('input[placeholder="Anonymous"]', botName)
+    await browser.setValue(selectors.nameInput, botName)
   }
 
   async function click(selector: string): Promise<void> {
@@ -60,42 +42,42 @@ const createBrowserConnection = (): BrowserConnection => {
   }
 
   async function clickTile(tile: Tile, doubleClick?: boolean): Promise<void> {
-    const selector = selectorOfTile(tile)
+    const selector = selectors.ofTile(tile)
     await click(selector)
     if (doubleClick) await click(selector)
   }
 
   async function clickExitGameButton(): Promise<void> {
-    await click(buttonSelectors['exitGame'])
+    await click(selectors.exitGame)
   }
 
   async function clickReplayListButton(): Promise<void> {
-    await click(buttonSelectors['replayList'])
+    await click(selectors.replayList)
   }
 
   function scrapeReplays(): string[] {
-    return Array.from(document.querySelectorAll('#replays-table > tbody > tr > td > a'))
+    return Array.from(document.querySelectorAll(selectors.replayLink))
       .map((anchor: HTMLAnchorElement) => anchor.href)
   }
 
   async function getReplays(): Promise<string[]> {
     await clickReplayListButton()
-    await browser.waitForVisible('#replays')
+    await browser.waitForVisible(selectors.replays)
 
-    while (await browser.isVisible(buttonSelectors['loadMore'])) {
-      await click(buttonSelectors['loadMore'])
+    while (await browser.isVisible(selectors.loadMore)) {
+      await click(selectors.loadMore)
       delay(200)
     }
 
     const replays = (await browser.execute(scrapeReplays)).value
 
-    await click(buttonSelectors['exitReplays'])
+    await click(selectors.exitReplays)
 
     return replays
   }
 
   async function orderHasResolved(tile: Tile): Promise<boolean> {
-    return !(await browser.isExisting(orderSelectorOfTile(tile)))
+    return !(await browser.isExisting(selectors.ofOrderArrow(tile)))
   }
 
   async function waitUntil(predicate: () => Promise<boolean>): Promise<void> {
@@ -120,29 +102,29 @@ const createBrowserConnection = (): BrowserConnection => {
   }
 
   async function beginTutorial(): Promise<VisibleGameInformation> {
-    await click(buttonSelectors['playGame'])
-    await browser.waitForVisible('td.selectable.general', 1000)
+    await click(selectors.playGame)
+    await waitForGameToStart()
     return scrapeCurrentState()
   }
 
   async function beginRegularGame(selector: string): Promise<VisibleGameInformation> {
-    await click(buttonSelectors['playGame'])
-    await browser.waitForVisible('#game-modes', 1000)
+    await click(selectors.playGame)
+    await browser.waitForVisible(selectors.gameModes, 1000)
     await click(selector)
     await waitForGameToStart()
     return scrapeCurrentState()
   }
 
   async function beginFFAGame(): Promise<VisibleGameInformation> {
-    return beginRegularGame(buttonSelectors['ffa'])
+    return beginRegularGame(selectors.ffa)
   }
 
   async function begin1v1Game(): Promise<VisibleGameInformation> {
-    return beginRegularGame(buttonSelectors['1v1'])
+    return beginRegularGame(selectors.oneVsOne)
   }
 
   async function waitForGameToStart(): Promise<void> {
-    while (!(await browser.isVisible('#turn-counter'))) continue
+    while (!(await browser.isVisible(selectors.turnCounter))) continue
   }
 
   async function scrapeCurrentState(): Promise<VisibleGameInformation> {
@@ -151,14 +133,14 @@ const createBrowserConnection = (): BrowserConnection => {
   }
 
   async function turnHasIncremented(lastTurn: number): Promise<boolean> {
-    const turnCounterText = await browser.getText('#turn-counter') as string
+    const turnCounterText = await browser.getText(selectors.turnCounter) as string
     const match = turnCounterText.match(/\d+/)
     if (!match) throw new Error('Could locate turn counter')
     return parseInt(match[0], 10) > lastTurn
   }
 
   async function waitForMainPage(): Promise<void> {
-    await browser.waitForVisible('#main-menu', 5000)
+    await browser.waitForVisible(selectors.mainMenu, 5000)
   }
 }
 
