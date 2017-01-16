@@ -5,4 +5,4 @@ const smallWords = require('fs').readFileSync('/usr/share/dict/words', 'utf8').s
 export const botName = sample(smallWords) + '-' + sample(smallWords)
 export const generalsIoUrl = 'http://generals.io'
 export const webdriverOpts = { desiredCapabilities: { browserName: 'chrome' } }
-export const viewportSize = { height: 4000, width: 4000 }
+export const viewportSize = { width: 1380, height: 800 }

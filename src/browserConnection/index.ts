@@ -33,14 +33,44 @@ export async function createBrowserConnection(): Promise<BrowserConnection> {
     close,
   }
 
+  function addCustomStyles(): void {
+    const head = document.getElementsByTagName('head')[0]
+    const style = document.createElement('style')
+    style.type = 'text/css'
+    style.media = 'all'
+    style.innerHTML = `
+      #game-page > .relative {
+        top: 0 !important;
+        left: 100px !important;
+      }
+
+      #tutorial {
+        display: none;
+      }
+    `
+    head.appendChild(style)
+  }
+
   async function load(): Promise<void> {
-    // await browser.setViewportSize(viewportSize, false)
+    await browser.execute(addCustomStyles)
+    await browser.setViewportSize(viewportSize, false)
     await browser.execute(scrapeCurrentStateScript)
     await enterName()
   }
 
   async function enterName(): Promise<void> {
     await browser.setValue(selectors.nameInput, botName)
+  }
+
+  async function zoomGameOut(): Promise<void> {
+    await browser.keys('9')
+    await browser.keys('9')
+    await browser.keys('9')
+    await browser.keys('9')
+    await browser.keys('9')
+    await browser.keys('9')
+    await browser.keys('9')
+    await browser.keys('9')
   }
 
   async function click(selector: string): Promise<void> {
@@ -134,6 +164,7 @@ export async function createBrowserConnection(): Promise<BrowserConnection> {
 
   async function waitForGameToStart(): Promise<void> {
     while (!(await browser.isVisible(selectors.turnCounter))) continue
+    await zoomGameOut()
   }
 
   async function scrapeCurrentState(): Promise<VisibleGameInformation> {
