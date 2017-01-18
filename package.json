@@ -9,7 +9,7 @@
     "dev": "npm run build && npm start",
     "selenium": "java -jar selenium-server-standalone-3.0.1.jar",
     "start": "node lib/index.js",
-    "test": "rm -rf lib && npm run build && mocha 'lib/**/*.spec.js'"
+    "test": "rm -rf lib && npm run build && mocha --require source-map-support/register 'lib/**/*.spec.js'"
   },
   "author": "",
   "license": "ISC",
@@ -31,6 +31,7 @@
     "jsdom": "9.9.1",
     "mocha": "3.2.0",
     "sinon": "1.17.6",
+    "source-map-support": "0.4.10",
     "tslint": "4.1.0",
     "typescript": "2.1.4"
   }
