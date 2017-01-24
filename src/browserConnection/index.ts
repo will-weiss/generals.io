@@ -1,6 +1,7 @@
-import { delay, race } from 'bluebird'
+import bluebird = require('bluebird')
 import webdriverio = require('webdriverio')
 import scrapeCurrentStateScript from './scrapeCurrentStateScript'
+import addCustomStylesScript from './addCustomStylesScript'
 import { VisibleGameInformation, Order, Tile } from '../types'
 import { botName, generalsIoUrl, webdriverOpts, viewportSize } from '../config'
 import * as selectors from './selectors'
@@ -10,10 +11,10 @@ type Browser = webdriverio.Client<void>
 
 
 export interface BrowserConnection {
-  submitOrder(order: Order | undefined, lastTurn: number): Promise<VisibleGameInformation>
   beginTutorial(): Promise<VisibleGameInformation>
   beginFFAGame(): Promise<VisibleGameInformation>
   begin1v1Game(): Promise<VisibleGameInformation>
+  submitOrder(order: Order | undefined, lastTurn: number): Promise<VisibleGameInformation>
   exitGameAndWaitForMainPage(): Promise<void>
   waitForGameToEndExitAndGetReplay(): Promise<string>
   close(): Promise<void>
@@ -33,27 +34,9 @@ export async function createBrowserConnection(): Promise<BrowserConnection> {
     close,
   }
 
-  function addCustomStyles(): void {
-    const head = document.getElementsByTagName('head')[0]
-    const style = document.createElement('style')
-    style.type = 'text/css'
-    style.media = 'all'
-    style.innerHTML = `
-      #game-page > .relative {
-        top: 0 !important;
-        left: 100px !important;
-      }
-
-      #tutorial {
-        display: none;
-      }
-    `
-    head.appendChild(style)
-  }
-
   async function load(): Promise<void> {
-    await browser.execute(addCustomStyles)
     await browser.setViewportSize(viewportSize, false)
+    await browser.execute(addCustomStylesScript)
     await browser.execute(scrapeCurrentStateScript)
     await enterName()
   }
@@ -63,11 +46,6 @@ export async function createBrowserConnection(): Promise<BrowserConnection> {
   }
 
   async function zoomGameOut(): Promise<void> {
-    await browser.keys('9')
-    await browser.keys('9')
-    await browser.keys('9')
-    await browser.keys('9')
-    await browser.keys('9')
     await browser.keys('9')
     await browser.keys('9')
     await browser.keys('9')
@@ -93,7 +71,7 @@ export async function createBrowserConnection(): Promise<BrowserConnection> {
 
   async function attemptToGetReplay(): Promise<string | undefined> {
     await clickReplayListButton()
-    await browser.waitForVisible(selectors.replays)
+    await browser.waitForVisible(selectors.replays, 1000)
     const linkPresent = await browser.isVisible(selectors.replayLink)
     if (!linkPresent) return undefined
     const replay = await browser.getAttribute(selectors.replayLink, 'href')
@@ -102,15 +80,20 @@ export async function createBrowserConnection(): Promise<BrowserConnection> {
   }
 
   async function refresh(): Promise<void> {
-    const refreshed = await race([browser.refresh().then(() => true), delay(10 * 1000).then(() => false)])
-    if (refreshed) return
+    const refreshing = browser.refresh().then(() => true)
+    const waitingTenSeconds = bluebird.delay(10 * 1000).then(() => false)
+    // refreshed will be true if refreshing finished before ten seconds elapsed
+    const refreshedSuccessfullyWithinTenSeconds = await bluebird.race([refreshing, waitingTenSeconds])
+    // Return if the browser refreshed successfully within ten seconds
+    if (refreshedSuccessfullyWithinTenSeconds) return
+    // Otherwise retry
     return refresh()
   }
 
   async function getReplay(): Promise<string> {
     const replay = await attemptToGetReplay()
     if (replay) return replay
-    await delay(30 * 1000)
+    await bluebird.delay(30 * 1000)
     await refresh()
     return getReplay()
   }
@@ -163,12 +146,12 @@ export async function createBrowserConnection(): Promise<BrowserConnection> {
   }
 
   async function waitForGameToStart(): Promise<void> {
-    while (!(await browser.isVisible(selectors.turnCounter))) continue
+    await browser.waitForVisible(selectors.turnCounter, 2 * 60 * 1000)
     await zoomGameOut()
   }
 
   async function scrapeCurrentState(): Promise<VisibleGameInformation> {
-    const result = await browser.execute(function(): any { return (window as any).scrapeCurrentState() })
+    const result = await browser.execute(function(): any { return this.scrapeCurrentState() })
     return result.value as VisibleGameInformation
   }
 
@@ -189,7 +172,6 @@ export async function createBrowserConnection(): Promise<BrowserConnection> {
   }
 
   async function waitForGameToEndExitAndGetReplay(): Promise<string> {
-    await browser.waitForVisible(selectors.watchReplay, 60 * 60 * 1000)
     await exitGameAndWaitForMainPage()
     return getReplay()
   }

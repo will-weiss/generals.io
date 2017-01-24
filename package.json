@@ -27,10 +27,12 @@
     "@types/lodash": "4.14.43",
     "@types/mocha": "2.2.33",
     "@types/sinon": "1.16.33",
+    "@types/sinon-chai": "2.7.27",
     "@types/webdriverio": "4.4.0",
     "jsdom": "9.9.1",
     "mocha": "3.2.0",
     "sinon": "1.17.6",
+    "sinon-chai": "2.8.0",
     "source-map-support": "0.4.10",
     "tslint": "4.1.0",
     "typescript": "2.1.4"
